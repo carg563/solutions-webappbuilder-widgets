@@ -1,12 +1,14 @@
 # Coordinate-Tool-Widget
 
-The Coordinate Tool is an Esri Prototype Widget for [Web AppBuilder for ArcGIS](http://doc.arcgis.com/en/web-appbuilder/).The Coordinate Tool allows analysts to input coordinates, quickly converting them between several common formats including Universal Transverse Mercator (UTM) and Military Grid Reference System (MGRS). 
+The Coordinate Tool is an Esri Prototype Widget for [Web AppBuilder for ArcGIS](http://doc.arcgis.com/en/web-appbuilder/).The Coordinate Tool allows analysts to input coordinates, quickly converting them between several common formats including Universal Transverse Mercator (UTM), Military Grid Reference System (MGRS),
+Degrees, Decimal, Minutes (DDM), Degrees, Minutes, Seconds (DMS), Decimal Degrees (DD), U.S. National Grid (USNG), and Global Area Reference System (GARS).  Analysts also have the ability to interact with the map to dynamically retrieve the current cursor location in any or all of the formats listed above.  They can then use the 
+Coordinate Tool to easily copy one or all coordinate formats to disseminate information to others for mission critical response. 
 
 ![Image of Coordinate Tool Widget][ss] 
 
 ## Features
 
-* Parses WGS1984 input coordinates and outputs multiple formats of the input coordinate works with
+* Parses WGS1984 input coordinates and outputs multiple formats of the input coordinate. Output coordinate formats can include:
 
     * DD, DDM, DMS, GARS, MGRS, USNG and UTM
 

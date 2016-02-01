@@ -84,11 +84,11 @@ define([
             };
 
             if (toType === 'MGRS') {
-                params.conversionMode = 'mgrsDefault';
+                params.conversionMode = 'mgrsNewStyle';
             } else if (toType === 'UTM') {
                 params.conversionMode = 'utmNorthSouth';
             } else if (toType === 'GARS') {
-                params.conversionMode = 'garsDefault'
+                params.conversionMode = 'garsCenter'
             }
 
             return this.geomService.fromGeoCoordinateString(params);

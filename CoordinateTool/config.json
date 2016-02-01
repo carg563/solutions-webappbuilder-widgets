@@ -1,7 +1,7 @@
 {
-    "zoom_level": 17,
-    "initial_coords":["DDM", "DMS", "MGRS", "UTM"],
+    "zoom_level": 15,
+    "initial_coords": ["DDM", "DMS", "MGRS", "UTM"],
     "geometry_service": {
-        "url": "http://sampleserver6.arcgisonline.com/arcgis/rest/services/Geometry/GeometryServer/fromGeoCoordinateString"
+        "url": "http://sampleserver6.arcgisonline.com/arcgis/rest/services/Geometry/GeometryServer"
     }
 }

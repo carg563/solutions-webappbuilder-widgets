@@ -8,11 +8,8 @@ define([
     'dojo/dom-style',
     'dojo/string',
     'dojo/topic',
-    'dojo/number',
     'dojo/keys',
     'dojo/dom',
-    'dojo/mouse',
-    'dojo/query',
     'dijit/_WidgetBase',
     'dijit/_TemplatedMixin',
     'dijit/_WidgetsInTemplateMixin',
@@ -27,8 +24,6 @@ define([
     'esri/SpatialReference',
     'esri/tasks/GeometryService',
     './util',
-    'libs/usng/usng',
-    './libs/gars',
     'jimu/dijit/Message'
 ], function (
     dojoDeclare,
@@ -39,11 +34,8 @@ define([
     dojoDomStyle,
     dojoString,
     dojoTopic,
-    dojoNumber,
     dojoKeys,
     dojoDom,
-    dojoMouse,
-    dojoQuery,
     dijitWidgetBase,
     dijitTemplatedMixin,
     dijitWidgetsInTemplate,
@@ -58,8 +50,6 @@ define([
     EsriSpatialReference,
     EsriGeometryService,
     Util,
-    usng,
-    gars,
     JimuMessage
 ) {
     'use strict';
@@ -75,6 +65,7 @@ define([
         constructor: function (args) {
             dojoDeclare.safeMixin(this, args);
             this.uid = args.id || dijit.registry.getUniqueId('cc');
+           //console.log("initializing : " + this.uid);
         },
 
         /**
@@ -93,21 +84,23 @@ define([
          **/
         postCreate: function () {
             //this.inherited(arguments);
-            this.uid = this.id;
+            //this.uid = this.id;
 
-            this.util = new Util({});
+            this.util = new Util({appConfig:this.parent_widget.config});
 
             var geomsrvcurl = this.parent_widget.config.geometry_service.url ||
                     'http://sampleserver6.arcgisonline.com/arcgis/rest/services/Geometry/GeometryServer/fromGeoCoordinateString';
 
             this.geomsrvc = new EsriGeometryService(geomsrvcurl);
 
+            // set initial value of coordinate type dropdown
             this.typeSelect.set('value', this.type);
 
             // setup event notification and handlers
             dojoTopic.subscribe("CRDWIDGETSTATEDIDCHANGE", dojoLang.hitch(this, this.parentStateDidChange));
             dojoTopic.subscribe("INPUTPOINTDIDCHANGE", dojoLang.hitch(this, this.mapWasClicked));
 
+            // listen for dijit events
             this.own(dojoOn(this.expandButton, 'click', dojoLang.hitch(this, this.expandButtonWasClicked)));
             this.own(dojoOn(this.addNewCoordinateNotationBtn, 'click', dojoLang.hitch(this, this.newCoordnateBtnWasClicked)));
             this.own(dojoOn(this.zoomButton, 'click', dojoLang.hitch(this, this.zoomButtonWasClicked)));
@@ -149,12 +142,16 @@ define([
 
             // set an initial coord
             if (this.currentClickPoint) {
-                this.getFormattedCoordinates(this.currentClickPoint);
+                this.updateDisplay(true);
+                //this.getFormattedCoordinates(this.currentClickPoint, true);
             }
         },
 
+        /**
+         *
+         **/
         cpSubBtnWasClicked: function (evt) {
-            console.log("Copy" + evt.currentTarget);
+            //console.log("Copy" + evt.currentTarget);
             var c = evt.currentTarget.id.split('~')[0];
             var s;
 
@@ -169,7 +166,6 @@ define([
 
             this.showToolTip(evt.currentTarget.id, t);
         },
-
 
         /**
          *
@@ -197,7 +193,7 @@ define([
                 try {
                     s = document.execCommand('copy');
 
-                } catch (err) {
+                } catch (caerr) {
                     s = false;
                 }
 
@@ -207,7 +203,7 @@ define([
                 this.coordtext.select();
                 try {
                     s = document.execCommand('copy');
-                } catch (err) {
+                } catch (cerr) {
                     s = false;
                 }
             }
@@ -217,10 +213,16 @@ define([
             this.showToolTip(this.cpbtn.id, t);
         },
 
+        /**
+         *
+         **/
         cpCoordPart: function (fromCntrl) {
 
         },
 
+        /**
+         *
+         **/
         showToolTip: function (onId, withText) {
 
             var n = dojoDom.byId(onId);
@@ -238,6 +240,7 @@ define([
          *
          **/
         geomSrvcDidComplete: function (r) {
+            console.log(this.uid + " - geomSrvcDidComplete");
             if (r[0].length <= 0) {
                 new JimuMessage({message: "unable to parse coordinates"});
                 return;
@@ -246,8 +249,12 @@ define([
             var newpt = new EsriPoint(r[0][0], r[0][1], new EsriSpatialReference({wkid: 4326}));
             this.currentClickPoint = newpt;
 
+
             if (this.input) {
+                this.zoomButtonWasClicked();
                 dojoTopic.publish("INPUTPOINTDIDCHANGE", {mapPoint: this.currentClickPoint});
+            } else {
+                //this.updateDisplay(true);
             }
         },
 
@@ -260,23 +267,24 @@ define([
 
         /**
          *
-         **/
+         *
         coordTextInputLostFocus: function (evt) {
-
-        },
+        },*/
 
         /**
-         *
+         * Handles enter key press event
          **/
         coordTextInputKeyWasPressed: function (evt) {
             if (evt.keyCode === dojoKeys.ENTER) {
-                var newType = this.util.getCoordinateType(evt.currentTarget.value);
+                var sanitizedInput = this.util.getCleanInput(evt.currentTarget.value);
+                var newType = this.util.getCoordinateType(sanitizedInput);
                 if (newType) {
                     this.type = newType;
-                    this.processCoordTextInput(evt.currentTarget.value.trim());
+                    this.processCoordTextInput(sanitizedInput);
                 } else {
                     new JimuMessage({message: "Unable to determine input coordinate type"});
                 }
+                dojoDomAttr.set(this.coordtext, 'value', sanitizedInput);
             }
         },
 
@@ -284,13 +292,10 @@ define([
          *
          **/
         processCoordTextInput: function (withStr) {
-            var params = {
-                sr: 4326,
-                conversionType: this.type,
-                strings: [withStr]
-            };
-
-            this.geomsrvc.fromGeoCoordinateString(params, dojoLang.hitch(this, this.geomSrvcDidComplete));
+            this.util.getXYNotation(withStr, this.type).then(
+                dojoLang.hitch(this, this.geomSrvcDidComplete),
+                dojoLang.hitch(this, this.geomSrvcDidFail)
+            );
         },
 
         /**
@@ -309,7 +314,8 @@ define([
             this.type = this.typeSelect.get('value');
 
             if (this.currentClickPoint) {
-                this.getFormattedCoordinates(this.currentClickPoint);
+                this.updateDisplay(true);
+                //this.getFormattedCoordinates(this.currentClickPoint, false);
             }
         },
 
@@ -327,6 +333,9 @@ define([
             dojoDomStyle.set(cntrl, 'display', 'none');
         },
 
+        /**
+         *
+         **/
         setVisible: function (cntrl) {
             dojoDomStyle.set(cntrl, 'display', 'inline-flex');
         },
@@ -342,15 +351,9 @@ define([
          *
          **/
         mapWasClicked: function (evt) {
-
-            if (this.input) {
-                this.parent_widget.coordGLayer.clear();
-                this.parent_widget.coordGLayer.add(new EsriGraphic(evt.mapPoint));
-            }
-
+           //console.log("mapWasClicked");
             this.currentClickPoint = this.getDDPoint(evt.mapPoint);
-
-            this.getFormattedCoordinates(this.currentClickPoint);
+            this.updateDisplay(true);
         },
 
         /**
@@ -370,212 +373,201 @@ define([
             dojoDomClass.toggle(this.coordcontrols, 'expanded');
 
             // if this.coordcontrols is expanded then disable all it's children
-            if (dojoDomClass.contains(this.coordcontrols, 'expanded')) {
-                this.setSubCoordUI();
-            }
+            this.setSubCoordUI(dojoDomClass.contains(this.coordcontrols, 'expanded'));
         },
 
-        setSubCoordUI: function () {
-            switch (this.type) {
-            case 'DD':
-            case 'DMS':
-            case 'DDM':
-                this.sub1label.innerHTML = 'Lat';
-                this.sub2label.innerHTML = 'Lon';
-                this.setHidden(this.sub3);
-                this.setHidden(this.sub4);
-                break;
-            case 'GARS':
-                this.sub1label.innerHTML = 'Lon';
-                this.sub2label.innerHTML = 'Lat';
-                this.sub3label.innerHTML = 'Quadrant';
-                this.setVisible(this.sub3);
-                this.sub4label.innerHTML = 'Key';
-                this.setVisible(this.sub4);
-                break;
-            case 'USNG':
-            case 'MGRS':
-                this.sub1label.innerHTML = 'GZD';
-                this.sub2label.innerHTML = 'Grid Sq';
-                this.sub3label.innerHTML = 'Easting';
-                this.setVisible(this.sub3);
-                this.sub4label.innerHTML = 'Northing';
-                this.setVisible(this.sub4);
-                break;
-            case 'UTM':
-                this.sub1label.innerHTML = 'Zone';
-                this.sub2label.innerHTML = 'Easting';
-                this.sub3label.innerHTML = 'Northing';
-                this.setVisible(this.sub3);
-                this.setHidden(this.sub4);
-                break;
+        /**
+         *
+         **/
+        setSubCoordUI: function (expanded) {
+
+            if (expanded) {
+                var cntrHeight = '150px';
+                switch (this.type) {
+                case 'DD':
+                case 'DMS':
+                case 'DDM':
+                    this.sub1label.innerHTML = 'Lat';
+                    this.sub2label.innerHTML = 'Lon';
+                    this.setHidden(this.sub3);
+                    this.setHidden(this.sub4);
+                    cntrHeight = '90px';
+                    break;
+                case 'GARS':
+                    this.sub1label.innerHTML = 'Lon';
+                    this.sub2label.innerHTML = 'Lat';
+                    this.sub3label.innerHTML = 'Quadrant';
+                    this.setVisible(this.sub3);
+                    this.sub4label.innerHTML = 'Key';
+                    this.setVisible(this.sub4);
+                    break;
+                case 'USNG':
+                case 'MGRS':
+                    this.sub1label.innerHTML = 'GZD';
+                    this.sub2label.innerHTML = 'Grid Sq';
+                    this.sub3label.innerHTML = 'Easting';
+                    this.setVisible(this.sub3);
+                    this.sub4label.innerHTML = 'Northing';
+                    this.setVisible(this.sub4);
+                    break;
+                case 'UTM':
+                    this.sub1label.innerHTML = 'Zone';
+                    this.sub2label.innerHTML = 'Easting';
+                    this.sub3label.innerHTML = 'Northing';
+                    this.setVisible(this.sub3);
+                    this.setHidden(this.sub4);
+                    cntrHeight = '125px';
+                    break;
+                }
+                dojoDomStyle.set(this.coordcontrols, 'height', cntrHeight);
+            } else {
+                dojoDomStyle.set(this.coordcontrols, 'height', '0px');
             }
         },
 
         /**
          *
          **/
-        getFormattedCoordinates: function () {
-            var frmt;
+        setCoordUI: function (withValue, updateInput) {
+            var parts;
             var latdeg;
             var latmin;
-            var latdirstr;
+            var latsec;
             var londeg;
             var lonmin;
-            var londirstr;
-            var utmcrds = [];
-            var utmzone = '';
-            var cntrlid = this.uid.split('_')[3];
-            switch (this.type) {
-            case 'DDM':
-                // Math.trunc not fully supported on older browsers
-                latdeg = Math.floor(Math.abs(this.currentClickPoint.y));
-                latmin = dojoNumber.format((Math.abs(this.currentClickPoint.y) - latdeg) * 60, {
-                    places: 2
-                });
+            var lonsec;
+            var gzd;
+            var grdsq;
+            var e;
+            var n;
+            var q;
+            var w;
+            var zone;
+            var cntrlid = this.uid.split('_')[1];
 
-                londeg = Math.floor(Math.abs(this.currentClickPoint.x));
-                lonmin = dojoNumber.format((Math.abs(this.currentClickPoint.x) - londeg) * 60, {
-                    places: 2
-                });
+            if (!this.input && this['cc_' + cntrlid + 'sub1val']) {
 
-                latdirstr = "N";
-                if (this.currentClickPoint.y < 0) {
-                    latdirstr = "S";
+                switch (this.type) {
+                case 'DDM':
+
+                    parts = withValue[0].split(/[ ,]+/);
+
+                    latdeg = parts[0];
+                    latmin = parts[1];
+
+                    londeg = parts[2];
+                    lonmin = parts[3];
+
+                    this['cc_' + cntrlid + 'sub1val'].value = dojoString.substitute('${latd} ${latm}', {
+                        latd: latdeg,
+                        latm: latmin
+                    });
+
+                    this['cc_' + cntrlid + 'sub2val'].value = dojoString.substitute('${lond} ${lonm}', {
+                        lond: londeg,
+                        lonm: lonmin
+                    });
+                    break;
+                case 'DD':
+                    parts = withValue[0].split(/[ ,]+/);
+
+                    latdeg = parts[0];
+
+                    londeg = parts[1];
+
+                    this['cc_' + cntrlid + 'sub1val'].value = dojoString.substitute('${xcrd}', {
+                        xcrd: latdeg
+                    });
+
+                    this['cc_' + cntrlid + 'sub2val'].value = dojoString.substitute('${ycrd}', {
+                        ycrd: londeg
+                    });
+                    break;
+                case 'DMS':
+                    parts = withValue[0].split(/[ ,]+/);
+
+                    latdeg = parts[0];
+                    latmin = parts[1];
+                    latsec = parts[2];
+
+                    this['cc_' + cntrlid + 'sub1val'].value = dojoString.substitute("${latd} ${latm} ${lats}", {
+                        latd: latdeg,
+                        latm: latmin,
+                        lats: latsec
+                    });
+
+                    londeg = parts[3];
+                    lonmin = parts[4];
+                    lonsec = parts[5];
+
+                    this['cc_' + cntrlid + 'sub2val'].value = dojoString.substitute("${lond} ${lonm} ${lons}", {
+                        lond: londeg,
+                        lonm: lonmin,
+                        lons: lonsec
+                    });
+                    break;
+                case 'USNG':
+                    gzd = withValue[0].match(/\d{1,2}[C-HJ-NP-X]/);
+                    grdsq = withValue[0].match(/\s[a-zA-Z]{2}/);
+                    e = withValue[0].match(/\s\d*\s/);
+                    n = withValue[0].match(/\d{5}$/);
+
+                    this['cc_' + cntrlid + 'sub1val'].value = gzd[0].trim();
+                    this['cc_' + cntrlid + 'sub2val'].value = grdsq[0].trim();
+                    this['cc_' + cntrlid + 'sub3val'].value = e[0].trim();
+                    this['cc_' + cntrlid + 'sub4val'].value = n[0].trim();
+                    break;
+                case 'MGRS':
+                    gzd = withValue[0].match(/\d{1,2}[C-HJ-NP-X]/);
+                    grdsq = withValue[0].replace(gzd, '').match(/[a-hJ-zA-HJ-Z]{2}/);
+                    e = withValue[0].replace(gzd + grdsq, '').match(/^\d{1,5}/);
+                    n = withValue[0].replace(gzd + grdsq, '').match(/\d{1,5}$/);
+
+                    this['cc_' + cntrlid + 'sub1val'].value = gzd[0].trim();
+                    this['cc_' + cntrlid + 'sub2val'].value = grdsq[0].trim();
+                    this['cc_' + cntrlid + 'sub3val'].value = e[0].trim();
+                    this['cc_' + cntrlid + 'sub4val'].value = n[0].trim();
+                    break;
+                case 'GARS':
+                    this['cc_' + cntrlid + 'sub1val'].value = withValue[0].match(/\d{3}/);
+                    this['cc_' + cntrlid + 'sub2val'].value = withValue[0].match(/[a-zA-Z]{2}/);
+                    q = withValue[0].match(/\d*$/);
+
+                    this['cc_' + cntrlid + 'sub3val'].value = q[0][0];
+                    this['cc_' + cntrlid + 'sub4val'].value = q[0][1];
+                    break;
+                case 'UTM':
+                    parts = withValue[0].split(/[ ,]+/);
+                    zone = parts[0];
+                    e = parts[1];
+                    w = parts[2];
+
+                    this['cc_' + cntrlid + 'sub1val'].value = zone;
+                    this['cc_' + cntrlid + 'sub2val'].value = e;
+                    this['cc_' + cntrlid + 'sub3val'].value = w;
+                    break;
                 }
-
-                londirstr = "E";
-                if (this.currentClickPoint.x < 0) {
-                    londirstr = "W";
-                }
-
-                frmt = dojoString.substitute('${latd}° ${latm}${latdir} ${lond}° ${lonm}${londir}', {
-                    latd: latdeg,
-                    latm: latmin,
-                    latdir: latdirstr,
-                    lond: londeg,
-                    lonm: lonmin,
-                    londir: londirstr
-                });
-
-                this['cc_' + cntrlid + 'sub1val'].value = dojoString.substitute('${latd}° ${latm}${latdir}', {
-                    latd: latdeg,
-                    latm: latmin,
-                    latdir: latdirstr
-                });
-
-                this['cc_' + cntrlid + 'sub2val'].value = dojoString.substitute('${lond}° ${lonm}${londir}', {
-                    lond: londeg,
-                    lonm: lonmin,
-                    londir: londirstr
-                });
-
-                break;
-            case 'DD':
-                frmt = dojoString.substitute('${xcrd} ${ycrd}', {
-                    xcrd: dojoNumber.format(this.currentClickPoint.y, {
-                        places: 4
-                    }),
-                    ycrd: dojoNumber.format(this.currentClickPoint.x, {
-                        places: 4
-                    })
-                });
-
-                this['cc_' + cntrlid + 'sub1val'].value = dojoString.substitute('${xcrd}', {
-                    xcrd: dojoNumber.format(this.currentClickPoint.y, {
-                        places: 4
-                    })
-                });
-
-                this['cc_' + cntrlid + 'sub2val'].value = dojoString.substitute('${ycrd}', {
-                    ycrd: dojoNumber.format(this.currentClickPoint.x, {
-                        places: 4
-                    })
-                });
-                break;
-            case 'DMS':
-                frmt = dojoString.substitute("${d1} ${d2}", {
-                    d1: this.degToDMS(this.currentClickPoint.y, 'LAT'),
-                    d2: this.degToDMS(this.currentClickPoint.x, 'LON')
-                });
-
-                this['cc_' + cntrlid + 'sub1val'].value = dojoString.substitute("${d1}", {
-                    d1: this.degToDMS(this.currentClickPoint.y, 'LAT')
-                });
-
-                this['cc_' + cntrlid + 'sub2val'].value = dojoString.substitute("${d2}", {
-                    d2: this.degToDMS(this.currentClickPoint.x, 'LON')
-                });
-                break;
-            case 'USNG':
-                frmt = usng.LLtoUSNG(this.currentClickPoint.y, this.currentClickPoint.x, 5);
-                var gzd = frmt.match(/\d{1,2}[C-HJ-NP-X]/);
-                var grdsq = frmt.match(/\s[a-zA-Z]{2}/);
-                var e = frmt.match(/\s\d*\s/);
-                var n = frmt.match(/\d{5}$/);
-                this['cc_' + cntrlid + 'sub1val'].value = gzd;
-                this['cc_' + cntrlid + 'sub2val'].value = grdsq;
-                this['cc_' + cntrlid + 'sub3val'].value = e;
-                this['cc_' + cntrlid + 'sub4val'].value = n;
-                break;
-            case 'MGRS':
-                frmt = usng.LLtoMGRS(this.currentClickPoint.y, this.currentClickPoint.x, 5);
-                var usngfrmt = usng.LLtoUSNG(this.currentClickPoint.y, this.currentClickPoint.x, 5);
-                var gzd = usngfrmt.match(/\d{1,2}[C-HJ-NP-X]/);
-                var grdsq = usngfrmt.match(/\s[a-zA-Z]{2}/);
-                var e = usngfrmt.match(/\s\d*\s/);
-                var n = usngfrmt.match(/\d{5}$/);
-                this['cc_' + cntrlid + 'sub1val'].value = gzd;
-                this['cc_' + cntrlid + 'sub2val'].value = grdsq;
-                this['cc_' + cntrlid + 'sub3val'].value = e;
-                this['cc_' + cntrlid + 'sub4val'].value = n;
-                break;
-            case 'GARS':
-                frmt = gars.LLtoGARS(this.currentClickPoint.y, this.currentClickPoint.x);
-                this['cc_' + cntrlid + 'sub1val'].value = frmt.match(/\d{3}/);
-                this['cc_' + cntrlid + 'sub2val'].value = frmt.match(/[a-zA-Z]{2}/);
-                var q = frmt.match(/\d*$/);
-                this['cc_' + cntrlid + 'sub3val'].value = q[0][0];
-                this['cc_' + cntrlid + 'sub4val'].value = q[0][1];
-                break;
-            case 'UTM':
-                usng.LLtoUTM(this.currentClickPoint.y, this.currentClickPoint.x, utmcrds, utmzone);
-                frmt = dojoString.substitute("${z}${zd} ${utm1} ${utm2}", {
-                    z: utmcrds[2],
-                    zd: usng.UTMLetterDesignator(this.currentClickPoint.y),
-                    utm1: dojoNumber.format(utmcrds[0], {
-                        places: 0,
-                        pattern: '##000000'
-                    }),
-                    utm2: dojoNumber.format(utmcrds[1], {
-                        places: 0,
-                        pattern: '##000000'
-                    })
-                });
-
-                this['cc_' + cntrlid + 'sub1val'].value = dojoString.substitute("${z}${zd}", {
-                    z: utmcrds[2],
-                    zd: usng.UTMLetterDesignator(this.currentClickPoint.y)
-                });
-                this['cc_' + cntrlid + 'sub2val'].value = dojoString.substitute("${utm1}", {
-                    utm1: dojoNumber.format(utmcrds[0], {
-                        places: 0,
-                        pattern: '##000000'
-                    })
-                });
-                this['cc_' + cntrlid + 'sub3val'].value = dojoString.substitute("${utm2}", {
-                    utm2: dojoNumber.format(utmcrds[1], {
-                        places: 0,
-                        pattern: '##000000'
-                    })
-                });
-                break;
-            }
-            this.setSubCoordUI();
-            if (this.coordtext) {
-                dojoDomAttr.set(this.coordtext, 'value', frmt);
+                this.setSubCoordUI(dojoDomClass.contains(this.coordcontrols, 'expanded'));
             }
 
+            if (this.coordtext && updateInput) {
+                dojoDomAttr.set(this.coordtext, 'value', withValue);
+            }
+        },
+
+        /**
+         *
+         **/
+        getFormattedCoordinates: function (fromPoint, updateInput) {
+
+            this.util.getCoordValues(this.currentClickPoint, this.type).then(
+                dojoLang.hitch({s: this, ui: updateInput}, function (r) {
+                    this.s.setCoordUI(r, this.ui);
+                }),
+                dojoLang.hitch(this, function (err) {
+                    console.log("Unable to get coordinate value" + err);
+                })
+            );
         },
 
         /**
@@ -647,6 +639,20 @@ define([
                 s: sec_string,
                 dr: dir
             });
+        },
+
+        /**
+         *
+         **/
+        updateDisplay: function (updateInput) {
+           //console.log("updateDisplay " + updateInput);
+            this.getFormattedCoordinates(this.currentClickPoint, updateInput);
+
+            if (this.input) {
+                this.parent_widget.coordGLayer.clear();
+                //this.parent_widget.coordGLayer.add(new EsriGraphic(evt.mapPoint));
+                this.parent_widget.coordGLayer.add(new EsriGraphic(this.currentClickPoint));
+            }
         }
     });
 });

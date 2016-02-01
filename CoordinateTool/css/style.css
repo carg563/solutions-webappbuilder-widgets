@@ -87,8 +87,12 @@
 
 
 .jimu-widget-cw .coordarea.expanded {
-    height: 150px;
+    /*height: 150px;*/
     margin-top: 10px;
+}
+
+.jimu-widget-cw .coordarea.collapsed {
+    
 }
 
 .jimu-widget-cw .coordactions {

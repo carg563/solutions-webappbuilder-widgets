@@ -7,7 +7,6 @@ define([
     'dijit/_WidgetsInTemplateMixin',
     'jimu/BaseWidget',
     'esri/layers/GraphicsLayer',
-    'esri/tasks/GeometryService',
     'esri/renderers/SimpleRenderer',
     'esri/symbols/PictureMarkerSymbol',
     './CoordinateControl'
@@ -19,7 +18,6 @@ define([
     dijitWidgetsInTemplateMixin,
     jimuBaseWidget,
     EsriGraphicsLayer,
-    EsriGeometryService,
     EsriSimpleRenderer,
     EsriPictureMarkerSymbol,
     CoordinateControl
@@ -33,9 +31,6 @@ define([
          *
          **/
         postCreate: function () {
-            this.geomService = new EsriGeometryService(this.appConfig.geometryService);
-
-            //dojoTopic.subscribe("INPUTPOINTDIDCHANGE", dojoLang.hitch(this, this.getCoordValues));
             dojoTopic.subscribe("REMOVECONTROL", dojoLang.hitch(this, this.removeControl));
             dojoTopic.subscribe("ADDNEWNOTATION", dojoLang.hitch(this, this.addOutputSrBtn));
 
@@ -85,43 +80,6 @@ define([
 
             cc.placeAt(this.outputtablecontainer);
             cc.startup();
-        },
-
-        /**
-         *
-         **/
-        getCoordValues: function (evt) {
-            console.log("Get CoordValues");
-
-            var params = {
-                sr: evt.spatialReference,
-                coordinates: [[evt.x, evt.y]],
-                conversionType: 'MGRS',
-                conversionMode: 'mgrsDefault',
-                numOfDigits: null,
-                rounding: false,
-                addSpaces: false
-            };
-
-            this.geomService.toGeoCoordinateString(
-                params,
-                dojoLang.hitch(this, this.geoCoordStrDidComplete),
-                dojoLang.hitch(this, this.geoCoordStringDidFail)
-            );
-        },
-
-        /**
-         *
-         **/
-        geoCoordStrDidComplete: function (r) {
-            console.log(r);
-        },
-
-        /**
-         *
-         **/
-        geoCoordStringDidFail: function (r) {
-            console.log(r);
         },
 
         /**

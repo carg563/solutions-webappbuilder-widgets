@@ -86,7 +86,7 @@ define([
             //this.inherited(arguments);
             //this.uid = this.id;
 
-            this.util = new Util({appConfig:this.parent_widget.config});
+            this.util = new Util({appConfig: this.parent_widget.config});
 
             var geomsrvcurl = this.parent_widget.config.geometry_service.url ||
                     'http://sampleserver6.arcgisonline.com/arcgis/rest/services/Geometry/GeometryServer/fromGeoCoordinateString';
@@ -142,8 +142,7 @@ define([
 
             // set an initial coord
             if (this.currentClickPoint) {
-                this.updateDisplay(true);
-                //this.getFormattedCoordinates(this.currentClickPoint, true);
+                this.updateDisplay();
             }
         },
 
@@ -249,12 +248,9 @@ define([
             var newpt = new EsriPoint(r[0][0], r[0][1], new EsriSpatialReference({wkid: 4326}));
             this.currentClickPoint = newpt;
 
-
             if (this.input) {
                 this.zoomButtonWasClicked();
-                dojoTopic.publish("INPUTPOINTDIDCHANGE", {mapPoint: this.currentClickPoint});
-            } else {
-                //this.updateDisplay(true);
+                dojoTopic.publish("INPUTPOINTDIDCHANGE", {mapPoint: this.currentClickPoint, inputFromText: true});
             }
         },
 
@@ -314,8 +310,7 @@ define([
             this.type = this.typeSelect.get('value');
 
             if (this.currentClickPoint) {
-                this.updateDisplay(true);
-                //this.getFormattedCoordinates(this.currentClickPoint, false);
+                this.updateDisplay();
             }
         },
 
@@ -353,7 +348,12 @@ define([
         mapWasClicked: function (evt) {
            //console.log("mapWasClicked");
             this.currentClickPoint = this.getDDPoint(evt.mapPoint);
-            this.updateDisplay(true);
+            if (evt.inputFromText) {
+                this.inputFromText = true;
+            } else {
+                this.inputFromText = false;
+            }
+            this.updateDisplay();
         },
 
         /**
@@ -428,7 +428,8 @@ define([
         /**
          *
          **/
-        setCoordUI: function (withValue, updateInput) {
+        setCoordUI: function (withValue) {
+
             var parts;
             var latdeg;
             var latmin;
@@ -548,21 +549,24 @@ define([
                     break;
                 }
                 this.setSubCoordUI(dojoDomClass.contains(this.coordcontrols, 'expanded'));
-            }
-
-            if (this.coordtext && updateInput) {
-                dojoDomAttr.set(this.coordtext, 'value', withValue);
+                if (this.coordtext) {
+                    dojoDomAttr.set(this.coordtext, 'value', withValue);
+                }
+            } else if (!this.inputFromText) {
+                if (this.coordtext) {
+                    dojoDomAttr.set(this.coordtext, 'value', withValue);
+                }
             }
         },
 
         /**
          *
          **/
-        getFormattedCoordinates: function (fromPoint, updateInput) {
+        getFormattedCoordinates: function () {
 
             this.util.getCoordValues(this.currentClickPoint, this.type).then(
-                dojoLang.hitch({s: this, ui: updateInput}, function (r) {
-                    this.s.setCoordUI(r, this.ui);
+                dojoLang.hitch({s: this}, function (r) {
+                    this.s.setCoordUI(r);
                 }),
                 dojoLang.hitch(this, function (err) {
                     console.log("Unable to get coordinate value" + err);
@@ -644,9 +648,9 @@ define([
         /**
          *
          **/
-        updateDisplay: function (updateInput) {
-           //console.log("updateDisplay " + updateInput);
-            this.getFormattedCoordinates(this.currentClickPoint, updateInput);
+        updateDisplay: function () {
+
+            this.getFormattedCoordinates(this.currentClickPoint);
 
             if (this.input) {
                 this.parent_widget.coordGLayer.clear();

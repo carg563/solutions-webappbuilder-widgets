@@ -492,8 +492,7 @@ define([
         setCoordUI: function (withValue) {
 
             var cntrlid = this.uid.split('_')[1];
-            console.log(cntrlid + " SetCoordUI " + this.inputFromText + " Input Control:" + this.input);
-
+            
             var formattedStr
             if (this.input && this.inputFromText) {
                 formattedStr = withValue[0];
@@ -628,7 +627,7 @@ define([
          *
          **/
         updateDisplay: function () {
-            this.getFormattedCosordinates(this.currentClickPoint);
+            this.getFormattedCoordinates(this.currentClickPoint);
 
             if (this.input) {
                 this.parent_widget.coordGLayer.clear();

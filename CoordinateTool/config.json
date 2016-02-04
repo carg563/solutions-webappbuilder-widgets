@@ -2,6 +2,6 @@
     "zoom_level": 15,
     "initial_coords": ["DDM", "DMS", "MGRS", "UTM"],
     "geometry_service": {
-        "url": "http://sampleserver6.arcgisonline.com/arcgis/rest/services/Geometry/GeometryServer"
+        "url": "http://pscltags1.eastus.cloudapp.azure.com/arcgis/rest/services/Utilities/Geometry/GeometryServer"
     }
 }

@@ -150,7 +150,7 @@ define([
                     pattern: /\d{2}[S,s,N,n]*\s[A-Za-z]*\s\d*/
                 }, {
                     name: 'UTM',
-                    pattern: /^\d{1,3}[\s]?[SsNn]{1}[,\s]?\d*[mM]?[,\s]\d*[mM]?/
+                    pattern: /^\d{1,3}[\s,]?[SsNn]{1}[,\s]\d*\.?\d*[,\s]\d*\.?\d*/
                 }
             ];
 

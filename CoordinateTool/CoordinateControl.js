@@ -105,8 +105,6 @@ define([
          *
          **/
         postCreate: function () {
-            //this.inherited(arguments);
-            //this.uid = this.id;
 
             this.util = new Util({appConfig: this.parent_widget.config});
 
@@ -152,6 +150,7 @@ define([
                 content: new coordFormat(),
                 style: 'width: 400px'
             });
+
             dojoTopic.subscribe("CLOSEFORMATDIALOG", function () {
                 dijitPopup.close(this._frmtdlg);
             });
@@ -426,7 +425,6 @@ define([
          *
          **/
         formatButtonWasClicked: function () {
-            console.log("format button was clicked");
 
             this._frmtdlg.content.set('ct', this.type);
 
@@ -491,10 +489,14 @@ define([
          *
          **/
         setCoordUI: function (withValue) {
-
+            var formattedStr
             var cntrlid = this.uid.split('_')[1];
 
-            var formattedStr
+            // make sure we haven't been removed
+            if (!this['cc_' + cntrlid + 'sub1val']){
+                return;
+            }
+
             if (this.input && this.inputFromText) {
                 formattedStr = withValue[0];
             } else {

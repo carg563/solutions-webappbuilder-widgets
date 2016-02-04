@@ -54,7 +54,7 @@ define([
                 useCustom: false
             },
             DMS: {
-                defaultFormat: "A° B' C''N X° Y' Z''E",
+                defaultFormat: "A° B' C\"N X° Y' Z\"E",
                 customFormat: null,
                 useCustom: false
             },

@@ -43,6 +43,12 @@ define([
 
             var nd = numDigits || 2;
 
+            var tt;
+            if (toType.name) {
+              tt = toType.name;
+            } else {
+              tt = toType;
+            }
             /**
              * for parameter info
              * http://resources.arcgis.com/en/help/arcgis-rest-api/#/To_GeoCoordinateString/02r30000026w000000/
@@ -50,7 +56,7 @@ define([
             var params = {
                 sr: 4326,
                 coordinates: [[fromInput.x, fromInput.y]],
-                conversionType: toType,
+                conversionType: tt,
                 numOfDigits: nd,
                 rounding: false,
                 addSpaces: false
@@ -79,13 +85,21 @@ define([
         getXYNotation: function (fromStr, toType) {
 
             var a;
+
+            var tt;
+            if (toType.name) {
+              tt = toType.name;
+            } else {
+              tt = toType;
+            }
+
             var params = {
                 sr: 4326,
-                conversionType: toType.name,
+                conversionType: tt,
                 strings: []
             };
 
-            switch (toType.name) {
+            switch (tt) {
             case 'DD':
             case 'DDM':
             case 'DMS':
@@ -148,9 +162,9 @@ define([
 
             if (matchedtype.length > 0) {
                 return matchedtype;
-            } else {
-                return null;
             }
+
+            return null;
         },
 
         /**
@@ -332,7 +346,7 @@ define([
             return r;
         },
 
-         getFormattedGARSStr: function (fromValue, withFormatStr, addSignPrefix, addDirSuffix) {
+         getFormattedGARSStr: function (fromValue, withFormatStr, addSignPrefix) {
             var r = {};
             r.sourceValue = fromValue;
             r.sourceFormatString = withFormatStr;

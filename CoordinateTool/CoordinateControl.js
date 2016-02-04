@@ -146,6 +146,7 @@ define([
             this.own(this.typeSelect.on('change', dojoLang.hitch(this, this.typeSelectDidChange)));
 
             this.own(dojoOn(this.formatButton, 'click', dojoLang.hitch(this, this.formatButtonWasClicked)));
+
             this._frmtdlg = new dijitTooltipDialog({
                 id: this.uid + '_formatCoordinateTooltip',
                 content: new coordFormat(),
@@ -183,7 +184,7 @@ define([
                 dojoDomClass.add(this.cpbtn, 'outputCopyBtn');
                 this.setHidden(this.addNewCoordinateNotationBtn);
                 this.setHidden(this.zoomButton);
-                
+
                 this.coordtext.readOnly = true;
 
             }
@@ -426,7 +427,7 @@ define([
          **/
         formatButtonWasClicked: function () {
             console.log("format button was clicked");
-            
+
             this._frmtdlg.content.set('ct', this.type);
 
             console.log(this._frmtdlg.id);
@@ -492,7 +493,7 @@ define([
         setCoordUI: function (withValue) {
 
             var cntrlid = this.uid.split('_')[1];
-            
+
             var formattedStr
             if (this.input && this.inputFromText) {
                 formattedStr = withValue[0];
@@ -511,7 +512,7 @@ define([
 
                 switch (this.type) {
                 case 'DD':
-                    
+
                     r = this.util.getFormattedDDStr(withValue, format, as);
 
                     this['cc_' + cntrlid + 'sub1val'].value = dojoString.substitute('${xcrd}', {
@@ -539,9 +540,9 @@ define([
                     });
 
                     formattedStr = r.formatResult;
-                    break; 
+                    break;
                 case 'DMS':
-                    
+
                     r = this.util.getFormattedDMSStr(withValue, format, as);
 
                     this['cc_' + cntrlid + 'sub1val'].value = dojoString.substitute("${latd} ${latm} ${lats}", {
@@ -561,7 +562,7 @@ define([
                 case 'USNG':
 
                     r = this.util.getFormattedUSNGStr(withValue, format, as);
-                    
+
                     this['cc_' + cntrlid + 'sub1val'].value = r.gzd;
                     this['cc_' + cntrlid + 'sub2val'].value = r.grdsq;
                     this['cc_' + cntrlid + 'sub3val'].value = r.easting;

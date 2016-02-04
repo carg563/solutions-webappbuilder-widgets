@@ -5,7 +5,7 @@ define([
     'dojo/_base/lang',
     'dojo/sniff',
     'esri/tasks/GeometryService',
-    'esri/request',
+    'esri/request'
 ], function (
     dojoDeclare,
     dojoArray,
@@ -41,7 +41,7 @@ define([
          **/
         getCoordValues: function (fromInput, toType, numDigits) {
 
-            var nd = numDigits | 2;
+            var nd = numDigits || 2;
 
             /**
              * for parameter info
@@ -49,7 +49,7 @@ define([
              **/
             var params = {
                 sr: 4326,
-                coordinates: [[fromInput.x,fromInput.y]],
+                coordinates: [[fromInput.x, fromInput.y]],
                 conversionType: toType,
                 numOfDigits: nd,
                 rounding: false,
@@ -64,9 +64,9 @@ define([
                 params.conversionMode = 'utmNorthSouth';
                 params.addSpaces = true;
             } else if (toType === 'GARS') {
-                params.conversionMode = 'garsDefault'
+                params.conversionMode = 'garsDefault';
             } else if (toType === 'USNG') {
-                params.addSpaces = true
+                params.addSpaces = true;
                 params.numOfDigits = 5;
             }
 
@@ -85,26 +85,26 @@ define([
                 strings: []
             };
 
-            switch(toType.name){
-                case 'DD':
-                case 'DDM':
-                case 'DMS':
-                    a = fromStr.replace(/['°"NnSsEeWw]/g, '');
-                    params.strings.push(a);
-                    break;
-                case 'MGRS':
-                    params.conversionMode = 'mgrsNewStyle';
-                    params.strings.push(fromStr);
-                    break;
-                case 'UTM':
-                    params.conversionMode = 'utmNorthSouth';
-                    a = fromStr.replace(/[mM]/g, '');
-                    params.strings.push(a);
-                    break;
-                case 'GARS':
-                    params.conversionMode = 'garsCenter';
-                    params.strings.push(fromStr);
-                    break;
+            switch (toType.name) {
+            case 'DD':
+            case 'DDM':
+            case 'DMS':
+                a = fromStr.replace(/['°"NnSsEeWw]/g, '');
+                params.strings.push(a);
+                break;
+            case 'MGRS':
+                params.conversionMode = 'mgrsNewStyle';
+                params.strings.push(fromStr);
+                break;
+            case 'UTM':
+                params.conversionMode = 'utmNorthSouth';
+                a = fromStr.replace(/[mM]/g, '');
+                params.strings.push(a);
+                break;
+            case 'GARS':
+                params.conversionMode = 'garsCenter';
+                params.strings.push(fromStr);
+                break;
             }
             return this.geomService.fromGeoCoordinateString(params);
         },
@@ -139,7 +139,7 @@ define([
                     pattern: /^\d{1,3}[\s]?[SsNn]{1}[,\s]?\d*[mM]?[,\s]\d*[mM]?/
                 }
             ];
-            
+
             var fndType = undefined;
 
             var matchedtype = dojoArray.filter(strs, function (itm) {
@@ -165,7 +165,7 @@ define([
 
             var latdeg = parts[0].replace(/[nNsS]/, '');
             r.yvalue = latdeg;
-            
+
             var latdegdir = parts[0].slice(-1);
             r.ydir = latdegdir;
             if (addSignPrefix) {
@@ -188,12 +188,12 @@ define([
                     r.xvalue = '+' + londeg
                 }
             }
-            
+
             var s = withFormatStr.replace(/X/, r.yvalue);
             s = s.replace(/[eEwW]/, r.xdir);
             s = s.replace(/[nNsS]/, r.ydir);
             s = s.replace(/Y/, r.xvalue);
-            
+
             r.formatResult = s;
             return r;
         },
@@ -223,7 +223,7 @@ define([
                     r.yvalue = '-' + r.yvalue;
                 }
             }
-            
+
             var londeg = parts[2];
             r.londegvalue = londeg;
 
@@ -239,7 +239,7 @@ define([
                     r.xvalue = '+' + lonmin
                 }
             }
-            
+
             //A° B'N X° Y'E
             var s = withFormatStr.replace(/A/, r.latdegvalue);
             s = s.replace(/NnSs/, r.ydir);
@@ -247,10 +247,10 @@ define([
             s = s.replace(/X/, r.londegvalue);
             s = s.replace(/B/, r.yvalue);
             s = s.replace(/Y/, r.xvalue);
-            
+
             r.formatResult = s;
             return r;
-            
+
         },
 
         /**
@@ -266,17 +266,16 @@ define([
             r.latdeg = parts[0];
             r.latmin = parts[1];
             r.latsec = parts[2].replace(/[NnSs]/, '');;
-            
-            var latdegdir = r.latsec.slice(-1);
+
+            var latdegdir = parts[2].slice(-1);
             r.ydir = latdegdir;
 
             r.londeg = parts[3];
             r.lonmin = parts[4];
             r.lonsec = parts[5].replace(/[EWew]/, '');
 
-
-            var londegdir = r.lonsec.slice(-1);
-            r.xdir = latdegdir;
+            var londegdir = parts[5].slice(-1);
+            r.xdir = londegdir;
 
             //A° B' C''N X° Y' Z''E
             var s = withFormatStr.replace(/A/, r.latdeg);
@@ -287,10 +286,10 @@ define([
             s = s.replace(/Z/, r.lonsec);
             s = s.replace(/NnSs/, r.ydir);
             s = s.replace(/EeWw/, r.xdir);
-            
+
             r.formatResult = s;
             return r;
-            
+
         },
 
         getFormattedUSNGStr: function (fromValue, withFormatStr, addSignPrefix, addDirSuffix) {
@@ -344,7 +343,7 @@ define([
             var q = fromValue[0].match(/\d*$/);
             r.quadrant = q[0][0];
             r.key = q[0][1];
-            
+
             //XYQK
             var s = withFormatStr.replace(/X/, r.lon);
             s = s.replace(/Y/, r.lat);
@@ -354,7 +353,7 @@ define([
             r.formatResult = s;
             return r;
         },
-        
+
         /**
          *
          **/

@@ -256,8 +256,8 @@ define([
 
             //A° B'N X° Y'E
             var s = withFormatStr.replace(/A/, r.latdegvalue);
-            s = s.replace(/NnSs/, r.ydir);
-            s = s.replace(/EeWw/, r.xdir);
+            s = s.replace(/[NnSs]/, r.ydir);
+            s = s.replace(/[EeWw]/, r.xdir);
             s = s.replace(/X/, r.londegvalue);
             s = s.replace(/B/, r.yvalue);
             s = s.replace(/Y/, r.xvalue);
@@ -298,8 +298,8 @@ define([
             s = s.replace(/X/, r.londeg);
             s = s.replace(/Y/, r.lonmin);
             s = s.replace(/Z/, r.lonsec);
-            s = s.replace(/NnSs/, r.ydir);
-            s = s.replace(/EeWw/, r.xdir);
+            s = s.replace(/[NnSs]/, r.ydir);
+            s = s.replace(/[EeWw]/, r.xdir);
 
             r.formatResult = s;
             return r;

@@ -44,7 +44,7 @@ define([
 
         formats: {
             DD: {
-                defaultFormat: 'XN YE',
+                defaultFormat: 'YN XE',
                 customFormat: null,
                 useCustom: false
             },
@@ -74,7 +74,7 @@ define([
                 useCustom: false
             },
             UTM: {
-                defaultFormat: 'ZH Xm Ym',
+                defaultFormat: 'ZH X Y',
                 customFormat: null,
                 useCustom: false
             }

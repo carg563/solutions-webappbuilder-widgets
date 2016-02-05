@@ -497,10 +497,9 @@ define([
                 return;
             }
 
-            if (this.input && this.inputFromText) {
-                formattedStr = withValue[0];
+            if (this.input & this.inputFromText){
+              return;
             } else {
-
                 var format;
                 var f = this._frmtdlg.content.formats[this.type];
                 var as = this._frmtdlg.content.addSignChkBox.checked;
@@ -518,11 +517,11 @@ define([
                     r = this.util.getFormattedDDStr(withValue, format, as);
 
                     this['cc_' + cntrlid + 'sub1val'].value = dojoString.substitute('${xcrd}', {
-                        xcrd: r.yvalue
+                        xcrd: r.xvalue
                     });
 
                     this['cc_' + cntrlid + 'sub2val'].value = dojoString.substitute('${ycrd}', {
-                        ycrd: r.xvalue
+                        ycrd: r.yvalue
                     });
 
                     formattedStr = r.formatResult;
@@ -604,10 +603,9 @@ define([
                     break;
                 }
                 this.setSubCoordUI(dojoDomClass.contains(this.coordcontrols, 'expanded'));
-            }
-
-            if (this.coordtext) {
-                dojoDomAttr.set(this.coordtext, 'value', formattedStr);
+                if (this.coordtext) {
+                    dojoDomAttr.set(this.coordtext, 'value', formattedStr);
+                }
             }
         },
 

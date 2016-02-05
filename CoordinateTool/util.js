@@ -79,13 +79,20 @@ define([
             return this.geomService.toGeoCoordinateString(params);
         },
 
+        getLat: function (fromNumber) {
+          if (-89 > fromNumber < 91){
+            return true;
+          }
+          return false;
+        },
+
         /**
          *
          **/
         getXYNotation: function (fromStr, toType) {
 
             var a;
-
+            var ll;
             var tt;
             if (toType.name) {
               tt = toType.name;
@@ -132,7 +139,7 @@ define([
             //regexr.com
             var strs = [{
                     name: 'DD',
-                    pattern: /([-+]?\d*[NnsSeEwW]?[\s,][-+]?\d*[NnsSeEwW]?){1}/
+                    pattern: /([-+]?\d{1,3}[.]?\d*[NnSs]?[\s,]{1}[-+]?\d{1,3}[.]?\d*[EeWw]?){1}/
                 }, {
                     name: 'DDM',
                     pattern: /^\d{1,3}[°]?\s\d{1,3}[.]?\d*['NnSs]?\s\d{1,3}\d{1,3}[°]?\s\d{1,3}[.]?\d*['WwEe]?/
@@ -150,7 +157,7 @@ define([
                     pattern: /\d{2}[S,s,N,n]*\s[A-Za-z]*\s\d*/
                 }, {
                     name: 'UTM',
-                    pattern: /^\d{1,3}[\s,]?[SsNn]{1}[,\s]\d*\.?\d*[,\s]\d*\.?\d*/
+                    pattern: /^\d{1,3}[NnSs]{1}([\s,-]\d*\.?\d*[mM]?){2}/
                 }
             ];
 
@@ -203,10 +210,10 @@ define([
                 }
             }
 
-            var s = withFormatStr.replace(/X/, r.yvalue);
+            var s = withFormatStr.replace(/X/, r.xvalue);
             s = s.replace(/[eEwW]/, r.xdir);
             s = s.replace(/[nNsS]/, r.ydir);
-            s = s.replace(/Y/, r.xvalue);
+            s = s.replace(/Y/, r.yvalue);
 
             r.formatResult = s;
             return r;
@@ -250,7 +257,7 @@ define([
                 if (r.xdir === 'W') {
                     r.xvalue = '-' + lonmin;
                 } else {
-                    r.xvalue = '+' + lonmin
+                    r.xvalue = '+' + lonmin;
                 }
             }
 

@@ -81,7 +81,6 @@ Remove Coordinate Output Format
 1.	Click the Remove Coordinate button in the Output section in the same row as the desired coordinate.
 2.	The Output coordinate will be removed from the Output list.
 
-
 Coordinate Output Format
 
 The Coordinate Tool allows formatting of notations using a custom format string for each particular coordinate type.
@@ -134,7 +133,7 @@ The Coordinate Tool allows formatting of notations using a custom format string 
             - "K" = Key
             - Example: "XYQK" = "221LW37"
 
-### General Help
+## General Help
 
 * [New to Github? Get started here.](http://htmlpreview.github.com/?https://github.com/Esri/esri.github.com/blob/master/help/esri-getting-to-know-github.html)
 

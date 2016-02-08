@@ -42,6 +42,7 @@ In order to develop and test widgets you need to deploy the CoordinateTool folde
 The Coordinate Tool is an intuitive and easy to use widget. Below are some quick How-to steps on performing functions of the Coordinate Tool.
 
 Convert Coordinate Formats
+
 1.	Click the Coordinate Tool button.
 2.	The Coordinate Tool window appears.
 3.	Enter a coordinate in the Input text box.
@@ -53,12 +54,14 @@ Convert Coordinate Formats
 
 
 Zoom-to Input Coordinate
+
 1.	Enter a coordinate in the Input text box.
 2.	Click the Zoom button to Zoom-to the specified coordinate location.
 3.	An error message will appear if the Input coordinate is invalid.
 
 
 Map Point Tool
+
 1.	Click the Coordinate Tool button.
 2.	Click directly on the map using the cursor.
 3.	A blue point marker will be placed on the map at the clicked location.
@@ -67,12 +70,14 @@ Map Point Tool
 
 
 Copy Coordinates
+
 1.	Enter a coordinate in the Input text box.
 2.	The Input coordinate will automatically be converted in the desired Output coordinate formats.
 3.	Click the Copy all output coordinates button in the Input section to copy the Input coordinate in addition to      all other Output coordinate formats listed in the Output section.
 4.	If only a specific coordinate is desired for copying, click the Copy to clipboard button in the same row as the desired coordinate in the Output section.
 
 Remove Coordinate Output Format
+
 1.	Click the Remove Coordinate button in the Output section in the same row as the desired coordinate.
 2.	The Output coordinate will be removed from the Output list.
 
@@ -80,6 +85,7 @@ Remove Coordinate Output Format
 Coordinate Output Format
 
 The Coordinate Tool allows formatting of notations using a custom format string for each particular coordinate type.
+
 1.	After a Coordinate is added to the Output list, click the Format Output button.
 2.	In the Set Coordinate Format String window, choose the coordinate type to update.
 3.	Enter in the custom format string for the desired coordinate type.

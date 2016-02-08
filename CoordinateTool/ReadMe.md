@@ -41,46 +41,41 @@ In order to develop and test widgets you need to deploy the CoordinateTool folde
 ## Workflow
 The Coordinate Tool is an intuitive and easy to use widget. Below are some quick How-to steps on performing functions of the Coordinate Tool.
 
-* Convert Coordinate Formats
-  1.	Click the Coordinate Tool button.
-  2.	The Coordinate Tool window appears.
-  3.	Enter a coordinate in the Input text box.
-  4.	Click the (+) button to add an Output coordinate format.
-  5.	By default, the DD format appears in the Output format.
-  6.	Using the dropdown, select the desired Output coordinate.
-  7.	Repeat until all desired Output coordinate formats have been added to the Coordinate Tool window.
-  8.	The Input coordinate will automatically be converted in the desired Output coordinate formats.
+Convert Coordinate Formats
+1.	Click the Coordinate Tool button.
+2.	The Coordinate Tool window appears.
+3.	Enter a coordinate in the Input text box.
+4.	Click the (+) button to add an Output coordinate format.
+5.	By default, the DD format appears in the Output format.
+6.	Using the dropdown, select the desired Output coordinate.
+7.	Repeat until all desired Output coordinate formats have been added to the Coordinate Tool window.
+8.	The Input coordinate will automatically be converted in the desired Output coordinate formats.
 
 
-* Zoom-to Input Coordinate
-  1.	Enter a coordinate in the Input text box.
-  2.	Click the Zoom button to Zoom-to the specified coordinate location.
-  3.	An error message will appear if the Input coordinate is invalid.
+Zoom-to Input Coordinate
+1.	Enter a coordinate in the Input text box.
+2.	Click the Zoom button to Zoom-to the specified coordinate location.
+3.	An error message will appear if the Input coordinate is invalid.
 
 
-* Map Point Tool
-  1.	Click the Coordinate Tool button.
-  2.	Click directly on the map using the cursor.
-  3.	A blue point marker will be placed on the map at the clicked location.
-  4.	The cursor’s coordinate location will automatically be populated in the Input text box.
-  5.	The Input coordinate will automatically be converted in the desired Output coordinate formats.
+Map Point Tool
+1.	Click the Coordinate Tool button.
+2.	Click directly on the map using the cursor.
+3.	A blue point marker will be placed on the map at the clicked location.
+4.	The cursor’s coordinate location will automatically be populated in the Input text box.
+5.	The Input coordinate will automatically be converted in the desired Output coordinate formats.
 
 
-* Copy Coordinates
-  1.	Enter a coordinate in the Input text box.
-  2.	The Input coordinate will automatically be converted in the desired Output coordinate formats.
-  3.	Click the Copy all output coordinates button in the Input section to copy the Input coordinate in addition to      all other Output coordinate formats listed in the Output section.
-  4.	If only a specific coordinate is desired for copying, click the Copy to clipboard button in the same row as the desired coordinate in the Output section.
+Copy Coordinates
+1.	Enter a coordinate in the Input text box.
+2.	The Input coordinate will automatically be converted in the desired Output coordinate formats.
+3.	Click the Copy all output coordinates button in the Input section to copy the Input coordinate in addition to      all other Output coordinate formats listed in the Output section.
+4.	If only a specific coordinate is desired for copying, click the Copy to clipboard button in the same row as the desired coordinate in the Output section.
 
 * Remove Coordinate Output Format
-  1.	Click the Remove Coordinate button in the Output section in the same row as the desired coordinate.
-  2.	The Output coordinate will be removed from the Output list.
-  Format Custom Coordinate Output
-  The Coordinate Tool allows formatting of notations using a custom format string for each particular coordinate type.
-  1.	After a Coordinate is added to the Output list, click the Format Output button.
-  2.	In the Set Coordinate Format String window, choose the coordinate type to update.
-  3.	Enter in the custom format string for the desired coordinate type.
-
+1.	Click the Remove Coordinate button in the Output section in the same row as the desired coordinate.
+2.	The Output coordinate will be removed from the Output list.
+Format Custom Coordinate Output
 
 * Format Custom Coordinate Output
 
@@ -88,7 +83,7 @@ The Coordinate Tool is an intuitive and easy to use widget. Below are some quick
     1.	After a Coordinate is added to the Output list, click the Format Output button.
     2.	In the Set Coordinate Format String window, choose the coordinate type to update.
     3.	Enter in the custom format string for the desired coordinate type.
-      - 	Click the Add “+/-“ checkbox to append plus or minus signs to the coordinate numbers.
+      - Click the Add “+/-“ checkbox to append plus or minus signs to the coordinate numbers.
       -	The format string will need to conform to the following rules:
         - DD Decimal Degrees
             - "X" = Longitude
@@ -97,41 +92,41 @@ The Coordinate Tool is an intuitive and easy to use widget. Below are some quick
             - "E" or "W" = add "E" or "W" direction based on longitude
             - Example: "YE XN = “40.00N 120.00W”
         - MGRS and USNG
-          - "Z" = Grid Zone
-          - "S" = Grid Segment
-          - "X" = Easting
-          - "Y" = Northing
-          - Example: "Z S X Y" = "19T DE 14639 28236"
+            - "Z" = Grid Zone
+            - "S" = Grid Segment
+            - "X" = Easting
+            - "Y" = Northing
+            - Example: "Z S X Y" = "19T DE 14639 28236"
         - DMS - Degrees Minutes Seconds
-          - "A" = Latitude Degrees
-          - "B" = Latitude Minutes
-          - "C" = Latitude Seconds
-          - "X" = Longitude Degrees
-          - "Y" = Longitude Minutes
-          - "Z" = Longitude Seconds
-          - "N" or "S" = add "N" or "S" direction based on latitude
-          - "E" or "W" = add "E" or "W" direction based on longitude
-          - Example: "A0° B'N X° Y'E" = "41° 22.12'N 78° 36.45'W"
+            - "A" = Latitude Degrees
+            - "B" = Latitude Minutes
+            - "C" = Latitude Seconds
+            - "X" = Longitude Degrees
+            - "Y" = Longitude Minutes
+            - "Z" = Longitude Seconds
+            - "N" or "S" = add "N" or "S" direction based on latitude
+            - "E" or "W" = add "E" or "W" direction based on longitude
+            - Example: "A0° B'N X° Y'E" = "41° 22.12'N 78° 36.45'W"
         - DDM - Decimal Degrees Minutes
-          - "A" = Latitude Degrees
-          - "B" = Latitude Minutes	  
-          - "X" = Longitude Degrees
-          - "Y" = Longitude Minutes
-          - "N" or "S" = add "N" or "S" direction based on latitude
-          - "E" or "W" = add "E" or "W" direction based on longitude
-          - Example: "A° B' C"N X° Y' ZE" = "41° 22' 15.1"N 78° 36' 29.2"W"	 
+            - "A" = Latitude Degrees
+            - "B" = Latitude Minutes	  
+            - "X" = Longitude Degrees
+            - "Y" = Longitude Minutes
+            - "N" or "S" = add "N" or "S" direction based on latitude
+            - "E" or "W" = add "E" or "W" direction based on longitude
+            - Example: "A° B' C"N X° Y' ZE" = "41° 22' 15.1"N 78° 36' 29.2"W"	 
         - UTM
-          - "Z" = Zone
-          - "H" = Hemisphere
-          - "X" = Longitude Band
-          - "Y" = Latitude Band
-          - Example: "ZH Xm Ym" = "19N 414639m 4428236m"
+            - "Z" = Zone
+            - "H" = Hemisphere
+            - "X" = Longitude Band
+            - "Y" = Latitude Band
+            - Example: "ZH Xm Ym" = "19N 414639m 4428236m"
         - GARS
-          - "X" = Easting
-         - "Q" = Quadrant
-         - "Y" = Northing
-         - "K" = Key
-         - Example: "XYQK" = "221LW37"
+            - "X" = Easting
+            - "Q" = Quadrant
+            - "Y" = Northing
+            - "K" = Key
+            - Example: "XYQK" = "221LW37"
 
 ### General Help
 

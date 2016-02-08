@@ -72,17 +72,17 @@ Copy Coordinates
 3.	Click the Copy all output coordinates button in the Input section to copy the Input coordinate in addition to      all other Output coordinate formats listed in the Output section.
 4.	If only a specific coordinate is desired for copying, click the Copy to clipboard button in the same row as the desired coordinate in the Output section.
 
-* Remove Coordinate Output Format
+Remove Coordinate Output Format
 1.	Click the Remove Coordinate button in the Output section in the same row as the desired coordinate.
 2.	The Output coordinate will be removed from the Output list.
-Format Custom Coordinate Output
 
-* Format Custom Coordinate Output
 
-  The Coordinate Tool allows formatting of notations using a custom format string for each particular coordinate type.
-    1.	After a Coordinate is added to the Output list, click the Format Output button.
-    2.	In the Set Coordinate Format String window, choose the coordinate type to update.
-    3.	Enter in the custom format string for the desired coordinate type.
+Coordinate Output Format
+
+The Coordinate Tool allows formatting of notations using a custom format string for each particular coordinate type.
+1.	After a Coordinate is added to the Output list, click the Format Output button.
+2.	In the Set Coordinate Format String window, choose the coordinate type to update.
+3.	Enter in the custom format string for the desired coordinate type.
       - Click the Add “+/-“ checkbox to append plus or minus signs to the coordinate numbers.
       -	The format string will need to conform to the following rules:
         - DD Decimal Degrees

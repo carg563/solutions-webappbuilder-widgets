@@ -26,11 +26,14 @@ define([
     'dojo/topic',
     'dojo/keys',
     'dojo/dom',
+    'dojo/query',
     'dijit/_WidgetBase',
     'dijit/_TemplatedMixin',
     'dijit/_WidgetsInTemplateMixin',
     'dijit/form/TextBox',
+    'dijit/form/Textarea',
     'dijit/form/Select',
+    'dijit/InlineEditBox',
     'dijit/registry',
     'dijit/Tooltip',
     'dijit/TooltipDialog',
@@ -55,14 +58,17 @@ define([
     dojoTopic,
     dojoKeys,
     dojoDom,
+    dojoQuery,
     dijitWidgetBase,
     dijitTemplatedMixin,
     dijitWidgetsInTemplate,
     dijitTextBox,
+    dijitTextArea,
     dijitSelect,
+    dijitInlineEditBox,
     dijitRegistry,
     dijitTooltip,
-    dijitTooltipDialog,
+    DijitTooltipDialog,
     dijitPopup,
     coordCntrl,
     esriWMUtils,
@@ -72,7 +78,7 @@ define([
     EsriGeometryService,
     Util,
     JimuMessage,
-    coordFormat
+    CoordFormat
 ) {
     'use strict';
     return dojoDeclare([dijitWidgetBase, dijitTemplatedMixin, dijitWidgetsInTemplate], {
@@ -80,6 +86,7 @@ define([
         baseClass: 'jimu-widget-cc',
         input: true,
         inputFromText: false,
+        hasCustomLabel: false,
         /**** type: 'dd', Available Types: DD, DDM, DMS, GARS, MGRS, USNG, UTM ****/
 
         /**
@@ -106,92 +113,190 @@ define([
          **/
         postCreate: function () {
 
-            this.util = new Util({appConfig: this.parent_widget.config});
+          // set initial value of coordinate type dropdown
+          //this.typeSelect.set('value', this.type);
 
-            var geomsrvcurl = this.parent_widget.config.geometry_service.url ||
-                    'http://sampleserver6.arcgisonline.com/arcgis/rest/services/Geometry/GeometryServer/fromGeoCoordinateString';
+          this._frmtdlg = new DijitTooltipDialog({
+              id: this.uid + '_formatCoordinateTooltip',
+              content: new CoordFormat(),
+              style: 'width: 400px',
+              onClose: dojoLang.hitch(this, this.popupDidClose)
+          });
 
-            this.geomsrvc = new EsriGeometryService(geomsrvcurl);
+          this.setConfig();
 
-            // set initial value of coordinate type dropdown
-            this.typeSelect.set('value', this.type);
+          this.initUI();
 
-            // setup event notification and handlers
-            dojoTopic.subscribe("CRDWIDGETSTATEDIDCHANGE", dojoLang.hitch(this, this.parentStateDidChange));
+          // set an initial coord
+          if (this.currentClickPoint) {
+            this.updateDisplay();
+          }
+        },
 
-            dojoTopic.subscribe("INPUTPOINTDIDCHANGE", dojoLang.hitch(this, this.mapWasClicked));
+        /**
+         *
+         **/
+        setConfig: function () {
+          this.util = new Util({
+            appConfig: this.parentWidget.config
+          });
 
-            // listen for dijit events
-            this.own(dojoOn(this.expandButton, 'click', dojoLang.hitch(this, this.expandButtonWasClicked)));
+          var geomsrvcurl = this.parentWidget.config.geometryService.url ||
+            'http://pscltags1.eastus.cloudapp.azure.com/arcgis/rest/services/Utilities/Geometry/GeometryServer';
 
-            this.own(dojoOn(this.addNewCoordinateNotationBtn, 'click', dojoLang.hitch(this, this.newCoordnateBtnWasClicked)));
+          this.geomsrvc = new EsriGeometryService(geomsrvcurl);
 
-            this.own(dojoOn(this.zoomButton, 'click', dojoLang.hitch(this, this.zoomButtonWasClicked)));
+          this.zoomScale = this.parentWidget.config.zoomLevel || 10;
 
-            this.cpbtn.addEventListener('click', dojoLang.hitch(this, this.cpBtnWasClicked));
+        },
 
-            this.sub1val_cpbtn.addEventListener('click', dojoLang.hitch(this, this.cpSubBtnWasClicked));
+        /**
+         *
+         **/
+        initUI: function () {
+          // hide any actions we don't want to see on the input coords
+          if (this.input) {
+            this.setHidden(this.expandButton);
+            this.setHidden(this.removeControlBtn);
+            this.setHidden(this.coordNameContainer);
 
-            this.sub2val_cpbtn.addEventListener('click', dojoLang.hitch(this, this.cpSubBtnWasClicked));
+            dojoDomClass.add(this.cpbtn, 'inputCopyBtn');
+            dojoDomAttr.set(this.cpbtn, 'title', 'Copy All');
 
-            this.sub3val_cpbtn.addEventListener('click', dojoLang.hitch(this, this.cpSubBtnWasClicked));
+            // add a default graphic during input widget initialization
+            var cPt = this.parentWidget.map.extent.getCenter();
+            this.parentWidget.coordGLayer.add(new EsriGraphic(cPt));
+            this.currentClickPoint = this.getDDPoint(cPt);
+          } else {
+            dojoDomClass.add(this.cpbtn, 'outputCopyBtn');
+            this.setHidden(this.addNewCoordinateNotationBtn);
+            this.setHidden(this.zoomButton);
+            this.coordtext.readOnly = true;
+          }
+          this.setUIListeners();
+        },
 
-            this.sub4val_cpbtn.addEventListener('click', dojoLang.hitch(this, this.cpSubBtnWasClicked));
-            //this.own(dojoOn(this.cpbtn, 'click', dojoLang.hitch(this, this.cpBtnWasClicked)));
+        /**
+         *
+         **/
+        setUIListeners: function () {
+          // setup event notification and handlers
+          dojoTopic.subscribe(
+            'CRDWIDGETSTATEDIDCHANGE',
+            dojoLang.hitch(this, this.parentStateDidChange)
+          );
 
-            this.mapclickhandler = dojoOn.pausable(this.parent_widget.map, 'click', dojoLang.hitch(this, this.mapWasClicked));
+          dojoTopic.subscribe(
+            'INPUTPOINTDIDCHANGE',
+            dojoLang.hitch(this, this.mapWasClicked)
+          );
 
-            this.own(this.typeSelect.on('change', dojoLang.hitch(this, this.typeSelectDidChange)));
+          // listen for dijit events
+          this.own(dojoOn(
+            this.expandButton,
+            'click',
+            dojoLang.hitch(this, this.expandButtonWasClicked)
+          ));
 
-            this.own(dojoOn(this.formatButton, 'click', dojoLang.hitch(this, this.formatButtonWasClicked)));
+          this.own(dojoOn(
+            this.addNewCoordinateNotationBtn,
+            'click',
+            dojoLang.hitch(this, this.newCoordnateBtnWasClicked
+          )));
 
-            this._frmtdlg = new dijitTooltipDialog({
-                id: this.uid + '_formatCoordinateTooltip',
-                content: new coordFormat(),
-                style: 'width: 400px'
-            });
+          this.own(dojoOn(
+            this.zoomButton,
+            'click',
+            dojoLang.hitch(this, this.zoomButtonWasClicked)
+          ));
 
-            dojoTopic.subscribe("CLOSEFORMATDIALOG", function () {
-                dijitPopup.close(this._frmtdlg);
-            });
+          this.own(
+            this.coordName.on(
+              'change',
+              dojoLang.hitch(this, this.coordNameDidChange))
+          );
 
-            dojoTopic.subscribe("APPLYFORMATDIALOG", dojoLang.hitch(this, function () {
-                this.updateDisplay();
-                dijitPopup.close(this._frmtdlg);
-            }));
+          this.cpbtn.addEventListener(
+            'click',
+            dojoLang.hitch(this, this.cpBtnWasClicked)
+          );
 
-            // hide any actions we don't want to see on the input coords
-            if (this.input) {
+          this.subVal1CpBtn.addEventListener(
+            'click',
+            dojoLang.hitch(this, this.cpSubBtnWasClicked)
+          );
 
-                this.setHidden(this.expandButton);
-                this.setHidden(this.typeSelect.domNode);
-                this.setHidden(this.removeControlBtn);
-                //this.setHidden(this.formatButton);
-                this.own(dojoOn(this.coordtext, 'keyup', dojoLang.hitch(this, this.coordTextInputKeyWasPressed)));
-                //this.own(dojoOn(this.coordtext, 'blur', dojoLang.hitch(this, this.coordTextInputLostFocus)));
-                this.own(this.geomsrvc.on('error', dojoLang.hitch(this, this.geomSrvcDidFail)));
+          this.subVal2CpBtn.addEventListener(
+            'click',
+            dojoLang.hitch(this, this.cpSubBtnWasClicked)
+          );
 
-                dojoDomClass.add(this.cpbtn, 'inputCopyBtn');
-                dojoDomAttr.set(this.cpbtn, 'title', 'Copy all output coordinates');
+          this.subVal3CpBtn.addEventListener(
+            'click',
+            dojoLang.hitch(this, this.cpSubBtnWasClicked)
+          );
 
-                // add a default graphic during input widget initialization
-                var cPt = this.parent_widget.map.extent.getCenter();
-                this.parent_widget.coordGLayer.add(new EsriGraphic(cPt));
-                this.currentClickPoint = this.getDDPoint(cPt);
+          this.subVal3CpBtn.addEventListener(
+            'click',
+            dojoLang.hitch(this, this.cpSubBtnWasClicked)
+          );
 
-            } else {
-                dojoDomClass.add(this.cpbtn, 'outputCopyBtn');
-                this.setHidden(this.addNewCoordinateNotationBtn);
-                this.setHidden(this.zoomButton);
+          this.mapclickhandler = dojoOn.pausable(
+            this.parentWidget.map,
+            'click',
+            dojoLang.hitch(this, this.mapWasClicked)
+          );
 
-                this.coordtext.readOnly = true;
+          this.own(dojoOn(
+            this.formatButton,
+            'click',
+            dojoLang.hitch(this, this.formatButtonWasClicked)
+          ));
 
-            }
+          this.own(dojoOn(this._frmtdlg.content.applyButton, 'click',
+            dojoLang.hitch(this, function (d) {
+                  this.updateDisplay();
+                  if (!this.hasCustomLabel && !this._frmtdlg.content.formats[this._frmtdlg.content.ct].useCustom) {
+                    this.coordName.set('value', this._frmtdlg.content.ct);
+                  }
+                  dijitPopup.close(this._frmtdlg);
+            }))
+          );
 
-            // set an initial coord
-            if (this.currentClickPoint) {
-                this.updateDisplay();
-            }
+          this.own(dojoOn(this._frmtdlg.content.cancelButton, 'click',
+            dojoLang.hitch(this, function (d) {
+                  dijitPopup.close(this._frmtdlg);
+            }))
+          );
+
+          this.own(dojoOn(
+            this.coordtext,
+            'keyup',
+            dojoLang.hitch(this, this.coordTextInputKeyWasPressed)
+          ));
+
+          this.own(this.geomsrvc.on('error', dojoLang.hitch(
+            this,
+            this.geomSrvcDidFail)
+          ));
+        },
+
+        /**
+         *
+         **/
+        popupDidClose: function (evt) {
+          var fv = this._frmtdlg.content.frmtSelect.get('value');
+          if (this.type !== fv) {
+            this.type = fv;
+            this.updateDisplay();
+          }
+        },
+
+        /**
+         *
+         **/
+        coordNameDidChange: function (evt) {
+          this.hasCustomLabel = true;
         },
 
         /**
@@ -208,7 +313,7 @@ define([
                 s = false;
             }
 
-            var t = s ? "Copy Succesful" : "Unable to Copy\n use ctrl+c as an alternative";
+            var t = s ? 'Copy Succesful' : 'Unable to Copy\n use ctrl+c as an alternative';
 
             this.showToolTip(evt.currentTarget.id, t);
         },
@@ -219,14 +324,18 @@ define([
         cpBtnWasClicked: function (evt) {
             evt.preventDefault();
             var s = undefined;
+            var t;
             var tv;
+            var fw;
+            var w;
+
             if (this.input) {
 
-                var fw = dijitRegistry.toArray().filter(function (w) {
+                fw = dijitRegistry.toArray().filter(function (w) {
                     return w.baseClass === 'jimu-widget-cc' && !w.input;
                 });
 
-                var w = fw.map(function (w) {
+                w = fw.map(function (w) {
                     return w.coordtext.value;
                 }).join('\r\n');
 
@@ -254,7 +363,7 @@ define([
                 }
             }
 
-            var t = s ? "Copy Succesful" : "Unable to Copy\n use ctrl+c as an alternative";
+            t = s ? 'Copy Succesful' : 'Unable to Copy\n use ctrl+c as an alternative';
 
             this.showToolTip(this.cpbtn.id, t);
         },
@@ -263,7 +372,6 @@ define([
          *
          **/
         cpCoordPart: function (fromCntrl) {
-
         },
 
         /**
@@ -287,7 +395,7 @@ define([
          **/
         geomSrvcDidComplete: function (r) {
             if (r[0].length <= 0) {
-                new JimuMessage({message: "unable to parse coordinates"});
+                new JimuMessage({message: 'unable to parse coordinates'});
                 return;
             }
 
@@ -295,8 +403,11 @@ define([
             this.currentClickPoint = newpt;
 
             if (this.input) {
-                this.zoomButtonWasClicked();
-                dojoTopic.publish("INPUTPOINTDIDCHANGE", {mapPoint: this.currentClickPoint, inputFromText: true});
+                //this.zoomButtonWasClicked();
+                this.parentWidget.map.centerAt(this.currentClickPoint);
+                dojoTopic.publish('INPUTPOINTDIDCHANGE', {
+                  mapPoint: this.currentClickPoint,
+                  inputFromText: true});
             }
         },
 
@@ -304,7 +415,7 @@ define([
          *
          **/
         geomSrvcDidFail: function () {
-            new JimuMessage({message: "Unable to parse input coordinates"});
+          new JimuMessage({message: 'Unable to parse input coordinates'});
         },
 
         /**
@@ -321,10 +432,10 @@ define([
                 var sanitizedInput = this.util.getCleanInput(evt.currentTarget.value);
                 var newType = this.util.getCoordinateType(sanitizedInput);
                 if (newType) {
-                    this.type = newType[newType.length-1].name;
-                    this.processCoordTextInput(sanitizedInput);
+                    //this.type = newType[newType.length-1].name;
+                    this.processCoordTextInput(sanitizedInput, newType[newType.length-1].name);
                 } else {
-                    new JimuMessage({message: "Unable to determine input coordinate type"});
+                    new JimuMessage({message: 'Unable to determine input coordinate type'});
                 }
                 dojoDomAttr.set(this.coordtext, 'value', sanitizedInput);
             }
@@ -333,8 +444,8 @@ define([
         /**
          *
          **/
-        processCoordTextInput: function (withStr) {
-            this.util.getXYNotation(withStr, this.type).then(
+        processCoordTextInput: function (withStr, asType) {
+            this.util.getXYNotation(withStr, asType).then(
                 dojoLang.hitch(this, this.geomSrvcDidComplete),
                 dojoLang.hitch(this, this.geomSrvcDidFail)
             );
@@ -345,7 +456,12 @@ define([
          **/
         zoomButtonWasClicked: function () {
             if (this.input) {
-                this.parent_widget.map.centerAndZoom(this.currentClickPoint, 19);
+              if (this.parentWidget.map.getZoom() > this.zoomScale) {
+                this.parentWidget.map.centerAndZoom(this.currentClickPoint, this.zoomScale);
+              } else {
+                this.parentWidget.map.centerAt(this.currentClickPoint);
+              }
+
             }
         },
 
@@ -353,7 +469,7 @@ define([
          *
          **/
         typeSelectDidChange: function () {
-            this.type = this.typeSelect.get('value');
+            //this.type = this.typeSelect.get('value');
 
             if (this.currentClickPoint) {
                 this.updateDisplay();
@@ -364,7 +480,7 @@ define([
          *
          **/
         newCoordnateBtnWasClicked: function () {
-            dojoTopic.publish("ADDNEWNOTATION");
+            dojoTopic.publish('ADDNEWNOTATION', this.type);
         },
 
         /**
@@ -385,7 +501,7 @@ define([
          *
          **/
         remove: function () {
-            this.destroy();
+            dojoTopic.publish('REMOVECONTROL', this);
         },
 
         /**
@@ -425,10 +541,8 @@ define([
          *
          **/
         formatButtonWasClicked: function () {
-
             this._frmtdlg.content.set('ct', this.type);
 
-            console.log(this._frmtdlg.id);
             dijitPopup.open({
                 popup: this._frmtdlg,
                 around: this.formatButton
@@ -489,7 +603,7 @@ define([
          *
          **/
         setCoordUI: function (withValue) {
-            var formattedStr
+            var formattedStr;
             var cntrlid = this.uid.split('_')[1];
 
             // make sure we haven't been removed
@@ -497,10 +611,11 @@ define([
                 return;
             }
 
-            if (this.input & this.inputFromText){
+            if (this.input && this.inputFromText){
               return;
             } else {
                 var format;
+
                 var f = this._frmtdlg.content.formats[this.type];
                 var as = this._frmtdlg.content.addSignChkBox.checked;
                 var r;
@@ -546,13 +661,13 @@ define([
 
                     r = this.util.getFormattedDMSStr(withValue, format, as);
 
-                    this['cc_' + cntrlid + 'sub1val'].value = dojoString.substitute("${latd} ${latm} ${lats}", {
+                    this['cc_' + cntrlid + 'sub1val'].value = dojoString.substitute('${latd} ${latm} ${lats}', {
                         latd: r.latdeg,
                         latm: r.latmin,
                         lats: r.latsec
                     });
 
-                    this['cc_' + cntrlid + 'sub2val'].value = dojoString.substitute("${lond} ${lonm} ${lons}", {
+                    this['cc_' + cntrlid + 'sub2val'].value = dojoString.substitute('${lond} ${lonm} ${lons}', {
                         lond: r.londeg,
                         lonm: r.lonmin,
                         lons: r.lonsec
@@ -613,13 +728,12 @@ define([
          *
          **/
         getFormattedCoordinates: function () {
-
             this.util.getCoordValues(this.currentClickPoint, this.type).then(
                 dojoLang.hitch({s: this}, function (r) {
                     this.s.setCoordUI(r);
                 }),
                 dojoLang.hitch(this, function (err) {
-                    console.log("Unable to get coordinate value" + err);
+                    console.log(err);
                 })
             );
         },
@@ -631,8 +745,8 @@ define([
             this.getFormattedCoordinates(this.currentClickPoint);
 
             if (this.input) {
-                this.parent_widget.coordGLayer.clear();
-                this.parent_widget.coordGLayer.add(new EsriGraphic(this.currentClickPoint));
+                this.parentWidget.coordGLayer.clear();
+                this.parentWidget.coordGLayer.add(new EsriGraphic(this.currentClickPoint));
             }
         }
     });

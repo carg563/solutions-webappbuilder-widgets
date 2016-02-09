@@ -1,3 +1,19 @@
+///////////////////////////////////////////////////////////////////////////
+// Copyright © 2014 Esri. All Rights Reserved.
+//
+// Licensed under the Apache License Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+///////////////////////////////////////////////////////////////////////////
+
 /*global define*/
 define([
     'dojo/_base/declare',
@@ -19,7 +35,9 @@ define([
 
         constructor: function (ac) {
             this.appConfig = ac.appConfig;
-            this.geomService = new EsriGeometryService(this.appConfig.geometry_service.url);
+            this.geomService = new EsriGeometryService(
+              this.appConfig.geometryService.url
+            );
         },
 
         /**
@@ -92,7 +110,6 @@ define([
         getXYNotation: function (fromStr, toType) {
 
             var a;
-            var ll;
             var tt;
             if (toType.name) {
               tt = toType.name;
@@ -110,7 +127,7 @@ define([
             case 'DD':
             case 'DDM':
             case 'DMS':
-                a = fromStr.replace(/['°"NnSsEeWw]/g, '');
+                a = fromStr.replace(/['°"]/g, '');
                 params.strings.push(a);
                 break;
             case 'MGRS':
@@ -142,7 +159,7 @@ define([
                     pattern: /([-+]?\d{1,3}[.]?\d*[NnSs]?[\s,]{1}[-+]?\d{1,3}[.]?\d*[EeWw]?){1}/
                 }, {
                     name: 'DDM',
-                    pattern: /^\d{1,3}[°]?\s\d{1,3}[.]?\d*['NnSs]?\s\d{1,3}\d{1,3}[°]?\s\d{1,3}[.]?\d*['WwEe]?/
+                    pattern: /^\s?\d{1,3}[°]?\s[-+]?\d*\.?\d*\'?[NnSs]?[\s,]{1}\d{1,3}[°]?\s[-+]?\d*\.?\d*\'[EeWw]?/
                 }, {
                     name: 'DMS',
                     pattern: /([+-]?\d{1,3}[°]?[\s,]\d*[']?[\s,]\d*[.]?\d*['"]?[NnSsEeWw]?){1,2}/
@@ -161,11 +178,12 @@ define([
                 }
             ];
 
-            var fndType = undefined;
-
             var matchedtype = dojoArray.filter(strs, function (itm) {
                 return itm.pattern.test(this.v);
-            }, {t:this, v:clnInput});
+            }, {
+              t:this,
+              v:clnInput
+            });
 
             if (matchedtype.length > 0) {
                 return matchedtype;
@@ -206,7 +224,7 @@ define([
                 if (r.xdir === 'W') {
                     r.xvalue = '-' + londeg;
                 } else {
-                    r.xvalue = '+' + londeg
+                    r.xvalue = '+' + londeg;
                 }
             }
 
@@ -222,7 +240,7 @@ define([
         /**
          *
          **/
-        getFormattedDDMStr: function (fromValue, withFormatStr, addSignPrefix, addDirSuffix) {
+        getFormattedDDMStr: function (fromValue, withFormatStr, addSignPrefix) {
             var r = {};
             r.sourceValue = fromValue;
             r.sourceFormatString = withFormatStr;
@@ -232,7 +250,7 @@ define([
             var latdeg = parts[0];
             r.latdegvalue = latdeg;
 
-            var latmin = parts[1].replace(/[nNsS]/, '');;
+            var latmin = parts[1].replace(/[nNsS]/, '');
             r.yvalue = latmin;
 
             var latdegdir = parts[1].slice(-1);
@@ -277,7 +295,7 @@ define([
         /**
          *
          **/
-        getFormattedDMSStr: function (fromValue, withFormatStr, addSignPrefix, addDirSuffix) {
+        getFormattedDMSStr: function (fromValue, withFormatStr, addSignPrefix) {
             var r = {};
             r.sourceValue = fromValue;
             r.sourceFormatString = withFormatStr;
@@ -286,7 +304,7 @@ define([
 
             r.latdeg = parts[0];
             r.latmin = parts[1];
-            r.latsec = parts[2].replace(/[NnSs]/, '');;
+            r.latsec = parts[2].replace(/[NnSs]/, '');
 
             var latdegdir = parts[2].slice(-1);
             r.ydir = latdegdir;
@@ -313,7 +331,10 @@ define([
 
         },
 
-        getFormattedUSNGStr: function (fromValue, withFormatStr, addSignPrefix, addDirSuffix) {
+        /**
+         *
+         **/
+        getFormattedUSNGStr: function (fromValue, withFormatStr, addSignPrefix) {
             var r = {};
             r.sourceValue = fromValue;
             r.sourceFormatString = withFormatStr;
@@ -333,7 +354,10 @@ define([
             return r;
         },
 
-        getFormattedMGRSStr: function (fromValue, withFormatStr, addSignPrefix, addDirSuffix) {
+        /**
+         *
+         **/
+        getFormattedMGRSStr: function (fromValue, withFormatStr, addSignPrefix) {
             var r = {};
             r.sourceValue = fromValue;
             r.sourceFormatString = withFormatStr;
@@ -345,7 +369,7 @@ define([
 
             //Z S X# Y#
             var s = withFormatStr.replace(/Z/, r.gzd);
-            s = s.replace(/S/, r.grdsq);
+            s = s.replace(/S([^S]*)$/, r.grdsq+'$1');
             s = s.replace(/X/, r.easting);
             s = s.replace(/Y/, r.northing);
 
@@ -353,26 +377,29 @@ define([
             return r;
         },
 
-         getFormattedGARSStr: function (fromValue, withFormatStr, addSignPrefix) {
-            var r = {};
-            r.sourceValue = fromValue;
-            r.sourceFormatString = withFormatStr;
+        /**
+         *
+         **/
+        getFormattedGARSStr: function (fromValue, withFormatStr, addSignPrefix) {
+          var r = {};
+          r.sourceValue = fromValue;
+          r.sourceFormatString = withFormatStr;
 
-            r.lon = fromValue[0].match(/\d{3}/);
-            r.lat = fromValue[0].match(/[a-zA-Z]{2}/);
+          r.lon = fromValue[0].match(/\d{3}/);
+          r.lat = fromValue[0].match(/[a-zA-Z]{2}/);
 
-            var q = fromValue[0].match(/\d*$/);
-            r.quadrant = q[0][0];
-            r.key = q[0][1];
+          var q = fromValue[0].match(/\d*$/);
+          r.quadrant = q[0][0];
+          r.key = q[0][1];
 
-            //XYQK
-            var s = withFormatStr.replace(/X/, r.lon);
-            s = s.replace(/Y/, r.lat);
-            s = s.replace(/Q/, r.quadrant);
-            s = s.replace(/K/, r.key);
+          //XYQK
+          var s = withFormatStr.replace(/X/, r.lon);
+          s = s.replace(/Y/, r.lat);
+          s = s.replace(/Q/, r.quadrant);
+          s = s.replace(/K/, r.key);
 
-            r.formatResult = s;
-            return r;
+          r.formatResult = s;
+          return r;
         },
 
         /**

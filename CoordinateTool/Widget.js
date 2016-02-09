@@ -5,6 +5,7 @@ define([
     'dojo/topic',
     'dojo/_base/array',
     'dijit/_WidgetsInTemplateMixin',
+    'dijit/registry',
     'jimu/BaseWidget',
     'esri/layers/GraphicsLayer',
     'esri/renderers/SimpleRenderer',
@@ -16,6 +17,7 @@ define([
     dojoTopic,
     dojoArray,
     dijitWidgetsInTemplateMixin,
+    dijitRegistry,
     jimuBaseWidget,
     EsriGraphicsLayer,
     EsriSimpleRenderer,
@@ -31,18 +33,34 @@ define([
          *
          **/
         postCreate: function () {
-            dojoTopic.subscribe("REMOVECONTROL", dojoLang.hitch(this, this.removeControl));
-            dojoTopic.subscribe("ADDNEWNOTATION", dojoLang.hitch(this, this.addOutputSrBtn));
+            dojoTopic.subscribe(
+              'REMOVECONTROL',
+              dojoLang.hitch(this, this.removeControl)
+            );
 
-            this.coordTypes = ['DD', 'DDM', 'DMS', 'GARS', 'MGRS', 'USNG', 'UTM'];
-            if (this.config.initial_coords && this.config.initial_coords.length > 0) {
-                this.coordTypes = this.config.initial_coords;
+            dojoTopic.subscribe(
+              'ADDNEWNOTATION',
+              dojoLang.hitch(this, this.addOutputSrBtn)
+            );
+
+            this.coordTypes = [
+              'DD',
+              'DDM',
+              'DMS',
+              'GARS',
+              'MGRS',
+              'USNG',
+              'UTM'
+            ];
+
+            if (this.config.initialCoords && this.config.initialCoords.length > 0) {
+                this.coordTypes = this.config.initialCoords;
             }
 
             // Create graphics layer
             if (!this.coordGLayer) {
                 var glsym = new EsriPictureMarkerSymbol(
-                    this.folderUrl + "images/CoordinateLocation.png",
+                    this.folderUrl + 'images/CoordinateLocation.png',
                     26,
                     26
                 );
@@ -59,8 +77,8 @@ define([
         /**
          *
          **/
-        removeControl: function () {
-            console.log("Remove Control");
+        removeControl: function (r) {
+          r.destroyRecursive();
         },
 
         /**
@@ -72,7 +90,7 @@ define([
             }
 
             var cc = new CoordinateControl({
-                parent_widget: this,
+                parentWidget: this,
                 input: false,
                 currentClickPoint: this.inputControl.currentClickPoint,
                 type: withType
@@ -87,13 +105,14 @@ define([
          **/
         startup: function () {
             this.inputControl = new CoordinateControl({
-                parent_widget: this,
+                parentWidget: this,
                 input: true,
                 type: 'DD'
             });
             this.inputControl.placeAt(this.inputcoordcontainer);
             this.inputControl.startup();
 
+            // add default output coordinates
             dojoArray.forEach(this.coordTypes, function (itm) {
                 this.addOutputSrBtn(itm);
             }, this);
@@ -128,8 +147,8 @@ define([
                 }
             }
 
-            //inform child widgets we are inactive
-            dojoTopic.publish("CRDWIDGETSTATEDIDCHANGE", this.state);
+            //inform the children we are inactive
+            dojoTopic.publish('CRDWIDGETSTATEDIDCHANGE', this.state);
         },
 
         /**

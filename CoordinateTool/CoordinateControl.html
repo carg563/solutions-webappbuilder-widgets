@@ -1,26 +1,16 @@
 <div class='coordinateContainer'>
-
-    <div class='add-with-icon'>
-        <select style='width:80px' name='test' data-dojo-type='dijit/form/Select' data-dojo-attach-point='typeSelect'>
-            <option value='DD'>DD</option>
-            <option value='DDM'>DDM</option>
-            <option value='DMS'>DMS</option>
-            <option value='GARS'>GARS</option>
-            <option value='MGRS'>MGRS</option>
-            <option value='USNG'>USNG</option>
-            <option value='UTM'>UTM</option>
-        </select>
+    <div class='add-with-icon coordLabel' data-dojo-attach-point='coordNameContainer'>
+      <span data-dojo-type='dijit/InlineEditBox' width='75px' data-dojo-props="editor:'dijit/form/TextBox', autoSave:true" data-dojo-attach-point='coordName'>${type}</span>
     </div>
 
     <div class='add-with-icon'>
         <textarea id='${uid}' type='text' rows='1' class='ta' data-dojo-attach-point='coordtext' placeholder='Enter coordinates or click on map'></textarea>
     </div>
-    
+
     <div class='coordactions'>
-        
+
         <div class='add-with-icon'>
             <span id='${uid}_cpbtn' title='Copy to clipboard' data-dojo-attach-point= 'cpbtn' class='jimu-icon cpbtn'></span>
-            <!-- data-clipboard-action="copy" data-clipboard-target="#${uid}" -->
         </div>
 
         <div class='add-with-icon'>
@@ -40,10 +30,10 @@
         </div>
 
         <div class='add-with-icon'>
-            <span title="Expand Output" class='jimu-icon jimu-icon-down-arrow-8' data-dojo-attach-point='expandButton' ></span>
+            <span title="Expand Output" class='searchIcon esri-icon-down-arrow' data-dojo-attach-point='expandButton' ></span>
         </div>
     </div>
-    
+
     <div data-dojo-attach-point='coordcontrols' class='coordarea'>
         <div data-dojo-attach-point='sub1' class='coordformat'>
             <div class='crdfrmtlabel'>
@@ -51,7 +41,7 @@
             </div>
             <input readonly data-dojo-attach-point='${uid}sub1val' class='jimu-input crds'></input>
             <div class='add-with-icon'>
-                <span id='${uid}sub1val~cpbtn' title='Copy to clipboard' data-dojo-attach-point= 'sub1val_cpbtn' class='jimu-icon cpbtn'></span>
+                <span id='${uid}sub1val~cpbtn' title='Copy to clipboard' data-dojo-attach-point= 'subVal1CpBtn' class='jimu-icon cpbtn'></span>
             </div>
         </div>
         <div data-dojo-attach-point='sub2' class='coordformat'>
@@ -60,7 +50,7 @@
             </div>
             <input readonly data-dojo-attach-point='${uid}sub2val' class='jimu-input crds'></input>
              <div class='add-with-icon'>
-                <span id='${uid}sub2val~cpbtn' title='Copy to clipboard' data-dojo-attach-point= 'sub2val_cpbtn' class='jimu-icon cpbtn'></span>
+                <span id='${uid}sub2val~cpbtn' title='Copy to clipboard' data-dojo-attach-point= 'subVal2CpBtn' class='jimu-icon cpbtn'></span>
             </div>
         </div>
         <div data-dojo-attach-point='sub3' class='coordformat sub3'>
@@ -68,10 +58,10 @@
                  <span data-dojo-attach-point='sub3label'>label 1</span>
             </div>
             <input readonly data-dojo-attach-point='${uid}sub3val' class='jimu-input crds'>
-                
+
             </input>
              <div class='add-with-icon'>
-                <span id='${uid}sub3val~cpbtn' title='Copy to clipboard' data-dojo-attach-point= 'sub3val_cpbtn' class='jimu-icon cpbtn'></span>
+                <span id='${uid}sub3val~cpbtn' title='Copy to clipboard' data-dojo-attach-point= 'subVal3CpBtn' class='jimu-icon cpbtn'></span>
             </div>
         </div>
         <div data-dojo-attach-point='sub4' class='coordformat sub4'>
@@ -79,10 +69,10 @@
                 <span data-dojo-attach-point='sub4label'>label 1</span>
             </div>
             <input readonly data-dojo-attach-point='${uid}sub4val' class='jimu-input crds'>
-                
+
             </input>
              <div class='add-with-icon'>
-                <span id='${uid}sub4val~cpbtn' title='Copy to clipboard' data-dojo-attach-point= 'sub4val_cpbtn' class='jimu-icon cpbtn'></span>
+                <span id='${uid}sub4val~cpbtn' title='Copy to clipboard' data-dojo-attach-point= 'subVal4CpBtn' class='jimu-icon cpbtn'></span>
             </div>
         </div>
     </div>

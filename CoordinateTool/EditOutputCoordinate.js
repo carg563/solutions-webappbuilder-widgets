@@ -43,13 +43,25 @@ define([
         templateString: edittemplate,
 
         formats: {
+
+        },
+
+        ct: 'DD',
+        _setCtAttr: function (v) {
+            this.frmtSelect.set('value', v);
+        },
+        /**
+         *
+         **/
+        postCreate: function () {
+          this.formats = {
             DD: {
                 defaultFormat: 'YN XE',
                 customFormat: null,
                 useCustom: false
             },
             DDM: {
-                defaultFormat: "A° B'N X° Y'E",
+                defaultFormat: 'A° B\'N X° Y\'E',
                 customFormat: null,
                 useCustom: false
             },
@@ -78,24 +90,21 @@ define([
                 customFormat: null,
                 useCustom: false
             }
-        },
+          };
 
-        ct: 'DD',
-        _setCtAttr: function (v) {
-            this.frmtSelect.set('value', v);
-        },
-        /**
-         *
-         **/
-        postCreate: function () {
+          dojoDomAttr.set(this.frmtVal, 'value', this.formats[this.ct].defaultFormat);
 
-            this.own(this.frmtSelect.on('change', dojoLang.hitch(this, this.frmtSelectValueDidChange)));
+          this.own(
+            this.frmtSelect.on('change', dojoLang.hitch(
+            this,
+            this.frmtSelectValueDidChange)
+          ));
 
-            this.own(dojoOn(this.frmtVal, 'change', dojoLang.hitch(this, this.formatValDidChange)));
-
-            this.own(dojoOn(this.applyButton, 'click', dojoLang.hitch(this, this.applyButtonWasClicked)));
-
-            this.own(dojoOn(this.cancelButton, 'click', dojoLang.hitch(this, this.cancelButtonWasClicked)));
+          this.own(dojoOn(
+            this.frmtVal,
+            'change',
+            dojoLang.hitch(this, this.formatValDidChange)
+          ));
         },
 
         /**
@@ -109,6 +118,7 @@ define([
             var crdType = this.frmtSelect.get('value');
             this.formats[crdType].customFormat = newvalue;
             this.formats[crdType].useCustom = true;
+            this.currentformat = newvalue;
         },
 
         /**
@@ -116,25 +126,10 @@ define([
          **/
         frmtSelectValueDidChange: function () {
             var curval = this.frmtSelect.get('value');
-            var selval = this.formats[curval].useCustom
-                ? this.formats[curval].customFormat
-                : this.formats[curval].defaultFormat;
-
+            var selval = this.formats[curval].useCustom ? this.formats[curval].customFormat
+              : this.formats[curval].defaultFormat;
+            this.ct = curval;
             dojoDomAttr.set(this.frmtVal, 'value', selval);
-        },
-
-        /**
-         *
-         **/
-        applyButtonWasClicked: function () {
-            dojoTopic.publish("APPLYFORMATDIALOG", this);
-        },
-
-        /**
-         *
-         **/
-        cancelButtonWasClicked: function () {
-            dojoTopic.publish("CLOSEFORMATDIALOG", this);
         }
 
     });

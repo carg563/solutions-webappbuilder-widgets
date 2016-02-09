@@ -456,7 +456,7 @@ define([
          **/
         zoomButtonWasClicked: function () {
             if (this.input) {
-              if (this.parentWidget.map.getZoom() > this.zoomScale) {
+              if (this.parentWidget.map.getZoom() < this.zoomScale) {
                 this.parentWidget.map.centerAndZoom(this.currentClickPoint, this.zoomScale);
               } else {
                 this.parentWidget.map.centerAt(this.currentClickPoint);

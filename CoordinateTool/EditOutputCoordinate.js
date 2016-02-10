@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright (c) 2015 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ define([
         _setCtAttr: function (v) {
             this.frmtSelect.set('value', v);
         },
+
         /**
          *
          **/
@@ -66,7 +67,7 @@ define([
                 useCustom: false
             },
             DMS: {
-                defaultFormat: "A° B' C\"N X° Y' Z\"E",
+                defaultFormat: 'A° B\' C\"N X° Y\' Z\"E',
                 customFormat: null,
                 useCustom: false
             },

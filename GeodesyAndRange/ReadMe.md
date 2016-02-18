@@ -2,6 +2,8 @@
 
 This widget provides the ability to create geodesic features such as lines, circles, ellipses and range rings.
 
+![Image of Geodesy And Range Widget][ss]
+
 ## Features
 
 * Creates geodesic lines, circles, ellipses and range rings.
@@ -133,5 +135,6 @@ In order to develop and test widgets you need to deploy the GeodesyAndRange fold
 
   A copy of the license is available in the repository's [license.txt](license.txt) file.
 
+	[ss]: images/screenshot.png
   [](Esri Tags: Military Analyst Defense ArcGIS Widget Web AppBuilder ArcGISSolutions)
   [](Esri Language: Javascript)

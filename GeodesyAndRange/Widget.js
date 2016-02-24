@@ -19,6 +19,7 @@ define([
   'dojo/_base/lang',
   'dojo/topic',
   'dojo/_base/array',
+  'dojo/on',
   'dijit/_WidgetsInTemplateMixin',
   'dijit/registry',
   'jimu/BaseWidget',
@@ -33,6 +34,7 @@ define([
   dojoLang,
   dojoTopic,
   dojoArray,
+  dojoOn,
   dijitWidgetsInTemplate,
   dijitRegistry,
   jimuBaseWidget,
@@ -55,7 +57,7 @@ define([
         tabs: [
           {
             title: 'Lines',
-            content: new TabLine({}, this.lineTabNode)
+            content: new TabLine({map:this.map}, this.lineTabNode)
           },
           {
             title: 'Circle',
@@ -72,6 +74,9 @@ define([
         ]
       }, this.tabContainer);
 
+      this.own(dojoOn(this.clearGraphicsButton, 'click', function (){
+        dojoTopic.publish('CLEAR_GRAPHICS');
+      }));
     }
 
   });

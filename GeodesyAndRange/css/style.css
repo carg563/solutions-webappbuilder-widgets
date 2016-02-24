@@ -6,76 +6,80 @@
   border: 1px solid #838383;
 }
 
+.jimu-widget-GeodesyAndRange .selectInput {
+  width: 119px;
+}
+
+.jimu-widget-GeodesyAndRange .coordInput {
+  width: 225px;
+  height: 32px;
+}
+
 .jimu-widget-GeodesyAndRange .tabPanel {
   border-bottom: 1px solid #CCC;
   padding-bottom: 20px;
 }
 
+  .jimu-widget-GeodesyAndRange .tabPanel fieldset {
+    border:1px solid #CCC;
+    padding: 6px;
+    margin-top: 10px;
+  }
+
+  .jimu-widget-GeodesyAndRange .tabPanel fieldset > div{
+    margin: 3px;
+  }
+
+  .jimu-widget-GeodesyAndRange .tabPanel fieldset > div > label{
+    width: 50px;
+    display: inline-block;
+  }
+
+.jimu-widget-GeodesyAndRange .controls {
+  display: table;
+  margin: 0 auto;
+}
+
 .jimu-widget-GeodesyAndRange .buttonContainer {
   width: 100%;
-  text-align: right;
+  text-align: center;
   margin-top: 20px;
 }
 
-.jimu-widget-GeodesyAndRange .controlGroup {
+.jimu-widget-GeodesyAndRange .controlItem {
   display: flex;
-  align-items: center;
+}
+
+.jimu-widget-GeodesyAndRange .controlGroup {
   margin-top: 13px;
-  width: 100%;
 }
 
-.jimu-widget-GeodesyAndRange .tabPanel fieldset {
-  border:1px solid #CCC;
-  padding: 6px;
-}
+  .jimu-widget-GeodesyAndRange .controlGroup .splitRight {
+    position: absolute;
+    right: 25px;
+  }
 
-.jimu-widget-GeodesyAndRange .tabPanel fieldset > div{
-  margin: 3px;
-}
-
-.jimu-widget-GeodesyAndRange .tabPanel fieldset > div > label{
-  width: 50px;
-  display: inline-block;
-}
-
-
-
-.jimu-widget-GeodesyAndRange .controlGroup .splitRight {
-  position: absolute;
-  right: 25px;
-}
+  .jimu-widget-GeodesyAndRange .controlGroup > label{
+    width: 100px;
+  }
 
 .jimu-widget-GeodesyAndRange .controlSpace {
   margin-left: 6px;
 }
 
+  .jimu-widget-GeodesyAndRange .addPointBtn {
+    background: url(../images/draw_point.png) no-repeat;
+    width: 32px;
+    height: 32px;
+    background-repeat: no-repeat;
+    background-position: center center;
 
-.jimu-widget-GeodesyAndRange .controlGroup > div {
-  display: flex;
-}
+  }
 
-.jimu-widget-GeodesyAndRange .controlGroup > div > label {
-  line-height: 32px;
-  padding-right: 6px;
-  width: 125px;
-  display:inline-block;
-}
+    .jimu-widget-GeodesyAndRange .addPointBtn:hover {
+      background-color:#c0c0c0;
+    }
 
-/*a div button with a icon in its center*/
-.jimu-widget-GeodesyAndRange .icon-btn{
-  width: 32px;
-  position: relative;
-  background-color: #ffffff;
-  cursor: pointer;
-}
-
-.jimu-widget-GeodesyAndRange .icon-btn:hover{
-  background-color: #f4f4f4;
-}
-
-.jimu-widget-GeodesyAndRange .addPointBtn {
-  background: url(../images/draw_point.png) no-repeat;
-  width: 32px;
-  height: 32px;
-  background-size:32px;
-}
+    .jimu-widget-GeodesyAndRange .addPointBtn.jimu-state-active {
+      background-color:#c0c0c0;
+    }

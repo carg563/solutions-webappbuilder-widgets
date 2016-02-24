@@ -25,7 +25,7 @@ define([
     'dijit/_WidgetBase',
     'dijit/_TemplatedMixin',
     'dijit/_WidgetsInTemplateMixin',
-    'dojo/text!./TabCircle.html'
+    'dojo/text!./templates/TabCircle.html'
 ], function (
     dojoDeclare,
     dojoLang,

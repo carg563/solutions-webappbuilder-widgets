@@ -25,7 +25,7 @@ define([
     'dijit/_WidgetBase',
     'dijit/_TemplatedMixin',
     'dijit/_WidgetsInTemplateMixin',
-    'dojo/text!./TabEllipse.html'
+    'dojo/text!./templates/TabEllipse.html'
 ], function (
     dojoDeclare,
     dojoLang,

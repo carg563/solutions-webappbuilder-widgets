@@ -35,6 +35,7 @@ define([
     'esri/units',
     'esri/geometry/webMercatorUtils',
     './feedback',
+    './ShapeModel',
     'dojo/text!./templates/TabLine.html'
 ], function (
     dojoDeclare,
@@ -56,6 +57,7 @@ define([
     esriUnits,
     esriWMUtils,
     DrawFeedBack,
+    ShapeModel,
     templateStr
 ) {
     'use strict';
@@ -76,7 +78,9 @@ define([
         postCreate: function () {
           console.log('TabLine');
 
-          this.currentUnit = this.lengthUnitDD.get('value');
+          this.currentLengthUnit = this.lengthUnitDD.get('value');
+
+          this.currentAngleUnit = this.angleUnitDD.get('value');
 
           dojoTopic.subscribe('CLEAR_GRAPHICS', dojoLang.hitch(this, this.clearGraphics));
 
@@ -104,6 +108,17 @@ define([
             'click',
             dojoLang.hitch(this, this.pointButtonWasClicked)
           ));
+
+          this.own(this.lengthUnitDD.on(
+            'change',
+            dojoLang.hitch(this, this.lengthUnitDDDidChange)
+          ));
+
+          this.own(this.angleUnitDD.on(
+            'change',
+            dojoLang.hitch(this, this.angleUnitDDDidChange)
+          ));
+
         },
 
         /**
@@ -118,41 +133,48 @@ define([
         /**
          *
          **/
+        lengthUnitDDDidChange: function () {
+          this.currentLengthUnit = this.lengthUnitDD.get('value');
+          if (this.currentLine) {
+            dojoDomAttr.set(
+              this.lengthInput,
+              'value',
+              this.currentLine.getFormattedLength(this.currentLengthUnit)
+            );
+          }
+
+        },
+
+        /**
+         *
+         **/
+        angleUnitDDDidChange: function () {
+          this.currentAngleUnit = this.angleUnitDD.get('value');
+          if (this.currentLine) {
+            dojoDomAttr.set(
+              this.angleInput,
+              'value',
+              this.currentLine.getAngle(this.currentAngleUnit));
+          }
+        },
+
+        updateUI: function () {
+
+        },
+
+        /**
+         *
+         **/
         feedbackDidComplete: function (results) {
 
-          var gdgeo = esriGeometryEngine.geodesicDensify(results.geographicGeometry, 10000);
+          this.currentLine = new ShapeModel(results);
 
-          var gdLength = esriGeometryEngine.geodesicLength(results.geographicGeometry, this.currentUnit);
+          var g = new EsriGraphic(this.currentLine.wmGeometry, this._lineSym);
 
-          var wmgra = esriWMUtils.geographicToWebMercator(gdgeo);
-
-          var g = new EsriGraphic(wmgra, this._lineSym);
-
-          var stPoint = gdgeo.getPoint(0,0);
-
-          var endPoint = gdgeo.getPoint(0, gdgeo.paths[0].length - 1);
-
-          var startPointStr = dojoString.substitute('${xStr}, ${yStr}', {
-            xStr: dojoNumber.format(stPoint.y, {places:4}),
-            yStr: dojoNumber.format(stPoint.x, {places:4})
-          });
-
-          var endPointStr = dojoString.substitute('${xStr}, ${yStr}', {
-            xStr: dojoNumber.format(endPoint.y, {places:4}),
-            yStr: dojoNumber.format(endPoint.x, {places:4})
-          });
-
-          var len = dojoNumber.format(gdLength, {places:4});
-
-          var ang = dojoNumber.format(
-            this.getAngle(stPoint, endPoint),
-            {places:2}
-          );
-
-          dojoDomAttr.set(this.startPointCoords, 'value', startPointStr);
-          dojoDomAttr.set(this.endPointCoords, 'value', endPointStr);
-          dojoDomAttr.set(this.lengthInput, 'value', len);
-          dojoDomAttr.set(this.angleInput, 'value', ang);
+          dojoDomAttr.set(this.startPointCoords, 'value', this.currentLine.formattedStartPoint);
+          dojoDomAttr.set(this.endPointCoords, 'value', this.currentLine.formattedEndPoint);
+          this.lengthUnitDDDidChange();
+          this.angleUnitDDDidChange();
 
           this._gl.add(g);
           this.map.enableMapNavigation();
@@ -174,17 +196,5 @@ define([
           }
         },
 
-        /**
-         *
-         **/
-        getAngle: function (stPoint, endPoint) {
-          var delx = endPoint.y - stPoint.y;
-          var dely = endPoint.x - stPoint.x;
-
-          var azi = Math.atan2(dely, delx) * 180 / Math.PI;
-          var br = ((azi + 360) % 360).toFixed(2);
-
-          return br;
-        }
     });
 });

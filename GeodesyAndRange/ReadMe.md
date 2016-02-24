@@ -135,6 +135,6 @@ In order to develop and test widgets you need to deploy the GeodesyAndRange fold
 
   A copy of the license is available in the repository's [license.txt](license.txt) file.
 
-	[ss]: images/screenshot.png
+  [ss]: images/screenshot.png
   [](Esri Tags: Military Analyst Defense ArcGIS Widget Web AppBuilder ArcGISSolutions)
   [](Esri Language: Javascript)

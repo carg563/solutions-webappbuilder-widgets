@@ -34,7 +34,7 @@ define([
     'esri/graphic',
     'esri/units',
     'esri/geometry/webMercatorUtils',
-    './feedback',
+    './Feedback',
     './ShapeModel',
     'dojo/text!./templates/TabLine.html'
 ], function (
@@ -76,7 +76,6 @@ define([
          * dijit post create
          **/
         postCreate: function () {
-          console.log('TabLine');
 
           this.currentLengthUnit = this.lengthUnitDD.get('value');
 
@@ -87,14 +86,10 @@ define([
           // add extended toolbar
           this.dt = new DrawFeedBack(this.map);
 
-          this._lineSym = new EsriSimpleLineSymbol({
-            'type': 'esriSLS',
-            'style': 'esriSLSSolid',
-            'color': [255, 50, 50, 255],
-            'width': 1.25
-          });
+          this._lineSym = new EsriSimpleLineSymbol(this.linesymbol);
 
           this._gl = new EsriGraphicsLayer();
+
           this.map.addLayer(this._gl);
 
           this.own(
@@ -158,10 +153,6 @@ define([
           }
         },
 
-        updateUI: function () {
-
-        },
-
         /**
          *
          **/
@@ -194,7 +185,7 @@ define([
             dojoDomAttr.set(this.lengthInput, 'value', '');
             dojoDomAttr.set(this.angleInput, 'value', '');
           }
-        },
+        }
 
     });
 });

@@ -57,7 +57,14 @@ define([
         tabs: [
           {
             title: 'Lines',
-            content: new TabLine({map:this.map}, this.lineTabNode)
+            content: new TabLine({
+              map: this.map,
+              linesymbol: this.config.feedback.linesymbol || {
+                type: 'esriSLS',
+                style: 'esriSLSSolid',
+                color: [255, 50, 50, 255],
+                width: 1.25
+            }}, this.lineTabNode)
           },
           {
             title: 'Circle',

@@ -42,7 +42,7 @@ define([
      **/
     constructor: function () {
       // force loading of the geometryEngine
-      // prevents lag in feedback when using in mousedrag
+      // prevents lag in feedback when used in mousedrag
       esriGeoDUtils.isSimple(new EsriPoint({
         "x": -122.65,
         "y": 45.53,

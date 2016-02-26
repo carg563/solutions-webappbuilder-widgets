@@ -15,27 +15,51 @@
 ///////////////////////////////////////////////////////////////////////////
 
 define([
-  "dojo/_base/declare",
-  "dojo/_base/lang",
-  "dojo/has",
-  "esri/toolbars/draw",
-  "esri/geometry/Polyline",
-  "esri/geometry/Polygon",
-  "esri/geometry/Point",
-  "esri/graphic",
-  "esri/geometry/geometryEngineAsync"
+  'dojo/_base/declare',
+  'dojo/_base/lang',
+  'dojo/has',
+  'dojo/number',
+  'dojo/string',
+  'dojo/Stateful',
+  'esri/Color',
+  'esri/toolbars/draw',
+  'esri/geometry/Polyline',
+  'esri/geometry/Polygon',
+  'esri/geometry/Point',
+  'esri/geometry/screenUtils',
+  'esri/graphic',
+  'esri/geometry/geometryEngineAsync',
+  'esri/symbols/TextSymbol',
+  'esri/symbols/Font'
 ], function (
   dojoDeclare,
   dojoLang,
   dojoHas,
+  dojoNumber,
+  dojoString,
+  dojoStateful,
+  EsriColor,
   esriDraw,
   EsriPolyLine,
   EsriPolygon,
   EsriPoint,
+  esriScreenUtils,
   EsriGraphic,
-  esriGeoDUtils
+  esriGeoDUtils,
+  EsriTextSymbol,
+  EsriFont
 ) {
-  return dojoDeclare(esriDraw, {
+  return dojoDeclare([esriDraw, dojoStateful], {
+
+    lengthLayer: null,
+    _setLengthLayer: function (l) {
+      this._set('lengthLayer', l);
+    },
+
+    lengthUnit: 'meters',
+    _setLengthUnit: function (u) {
+      this._set('lengthUnit', u);
+    },
 
     /**
      *
@@ -44,17 +68,53 @@ define([
       // force loading of the geometryEngine
       // prevents lag in feedback when used in mousedrag
       esriGeoDUtils.isSimple(new EsriPoint({
-        "x": -122.65,
-        "y": 45.53,
-        "spatialReference": {
-          "wkid": 4326
+        'x': -122.65,
+        'y': 45.53,
+        'spatialReference': {
+          'wkid': 4326
         }
       })).then(function (r) {
-        console.log("Geometry Engine initialized");
+        console.log('Geometry Engine initialized');
       });
 
       this.inherited(arguments);
     },
+
+    /**
+     *
+     * http://ekenes.github.io/esri-js-samples/ge-length/
+     **/
+    showLength: function (pt, result) {
+      if (!this.lengthLayer) {return;}
+
+      this.lengthLayer.clear();
+
+      var length = dojoNumber.format(result, {places:2});
+      var lenStr = dojoString.substitute('${len} ${units}', {
+        len: length,
+        units: this.lengthUnit
+      });
+
+      var screen = esriScreenUtils.toScreenPoint(this.map.extent, this.map.width, this.map.height, pt);
+      screen.x -= 40;
+      screen.y += 20;
+
+      var lengthLoc = esriScreenUtils.toMapPoint(this.map.extent, this.map.width, this.map.height, screen);
+
+      var lblFont = new EsriFont(14, EsriFont.STYLE_NORMAL, EsriFont.VARIANT_NORMAL, EsriFont.WEIGHT_BOLD, 'Arial');
+
+      var txtLbl = new EsriTextSymbol(lenStr, lblFont, new EsriColor('white'));
+
+      this.lengthLayer.add(new EsriGraphic(lengthLoc, txtLbl));
+    },
+
+    /**
+     *
+     **/
+    numberWithCommas: function (x) {
+      return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    },
+
     /**
      * override drag event to create geodesic feedback
      **/
@@ -66,7 +126,7 @@ define([
       }
 
       // BlackBerry legacy issue (not changing for 3x)
-      if (dojoHas("esri-touch") && !this._points.length) {
+      if (dojoHas('esri-touch') && !this._points.length) {
         // BlackBerry Torch certainly needs this
         // to prevent page from panning
         evt.preventDefault();
@@ -88,14 +148,22 @@ define([
               [[start.x, start.y], [end.x, end.y]]
             ]});
 
+          // get geodesic length of user drawn line
           esriGeoDUtils.geodesicDensify(g, 10000).then(function(r) {
             _graphic.setGeometry(r);
           });
 
+          // draw length of current line
+          if (this.lengthLayer) {
+              esriGeoDUtils.geodesicLength(g, this.lengthUnit).then(dojoLang.hitch(this, function (l) {
+                this.showLength(end, l);
+              }));
+          }
+
           break;
       }
 
-      if (dojoHas("esri-touch")) {
+      if (dojoHas('esri-touch')) {
         // Prevent iOS from panning the web page
         evt.preventDefault();
       }

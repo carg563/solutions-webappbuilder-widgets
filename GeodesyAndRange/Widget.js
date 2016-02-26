@@ -53,18 +53,30 @@ define([
      *
      **/
     postCreate: function () {
+
+      this.lineTab = new TabLine({
+        map: this.map,
+        linesymbol: this.config.feedback.linesymbol || {
+          type: 'esriSLS',
+          style: 'esriSLSSolid',
+          color: [255, 50, 50, 255],
+          width: 1.25
+        }},
+        this.lineTabNode
+      );
+
+      /**
+       *
+       **/
+      this.lineTab.on('graphic_created', function () {
+        console.log('Widget notified that a graphic was created');
+      });
+
       this.tab = new JimuTabContainer3({
         tabs: [
           {
             title: 'Lines',
-            content: new TabLine({
-              map: this.map,
-              linesymbol: this.config.feedback.linesymbol || {
-                type: 'esriSLS',
-                style: 'esriSLSSolid',
-                color: [255, 50, 50, 255],
-                width: 1.25
-            }}, this.lineTabNode)
+            content: this.lineTab
           },
           {
             title: 'Circle',

@@ -81,16 +81,26 @@ define([
 
           this.currentAngleUnit = this.angleUnitDD.get('value');
 
-          dojoTopic.subscribe('CLEAR_GRAPHICS', dojoLang.hitch(this, this.clearGraphics));
-
-          // add extended toolbar
-          this.dt = new DrawFeedBack(this.map);
-
-          this._lineSym = new EsriSimpleLineSymbol(this.linesymbol);
+          this._lengthLayer = new EsriGraphicsLayer();
 
           this._gl = new EsriGraphicsLayer();
 
-          this.map.addLayer(this._gl);
+          this._lineSym = new EsriSimpleLineSymbol(this.linesymbol);
+
+          this.map.addLayers([this._gl, this._lengthLayer]);
+
+          // add extended toolbar
+          this.dt = new DrawFeedBack(this.map);
+          this.dt.set('lengthLayer', this._lengthLayer);
+
+          this.syncEvents();
+        },
+
+        /**
+         *
+         **/
+        syncEvents: function () {
+          dojoTopic.subscribe('CLEAR_GRAPHICS', dojoLang.hitch(this, this.clearGraphics));
 
           this.own(
             this.dt.on(
@@ -130,6 +140,7 @@ define([
          **/
         lengthUnitDDDidChange: function () {
           this.currentLengthUnit = this.lengthUnitDD.get('value');
+          this.dt.set('lengthUnit', this.currentLengthUnit);
           if (this.currentLine) {
             dojoDomAttr.set(
               this.lengthInput,
@@ -145,6 +156,7 @@ define([
          **/
         angleUnitDDDidChange: function () {
           this.currentAngleUnit = this.angleUnitDD.get('value');
+
           if (this.currentLine) {
             dojoDomAttr.set(
               this.angleInput,
@@ -159,17 +171,23 @@ define([
         feedbackDidComplete: function (results) {
 
           this.currentLine = new ShapeModel(results);
-
-          var g = new EsriGraphic(this.currentLine.wmGeometry, this._lineSym);
+          this.currentLine.graphic = new EsriGraphic(
+            this.currentLine.wmGeometry,
+            this._lineSym
+          );
 
           dojoDomAttr.set(this.startPointCoords, 'value', this.currentLine.formattedStartPoint);
           dojoDomAttr.set(this.endPointCoords, 'value', this.currentLine.formattedEndPoint);
           this.lengthUnitDDDidChange();
           this.angleUnitDDDidChange();
 
-          this._gl.add(g);
+          this._gl.add(this.currentLine.graphic);
+
+          this.emit('graphic_created', this.currentLine);
+
           this.map.enableMapNavigation();
           this.dt.deactivate();
+
           dojoDomClass.toggle(this.addPointBtn, 'jimu-state-active');
 
         },
@@ -180,6 +198,7 @@ define([
         clearGraphics: function () {
           if (this._gl) {
             this._gl.clear();
+            this._lengthLayer.clear();
             dojoDomAttr.set(this.startPointCoords, 'value', '');
             dojoDomAttr.set(this.endPointCoords, 'value', '');
             dojoDomAttr.set(this.lengthInput, 'value', '');

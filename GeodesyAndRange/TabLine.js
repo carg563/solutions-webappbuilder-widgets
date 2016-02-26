@@ -100,7 +100,9 @@ define([
          *
          **/
         syncEvents: function () {
-          dojoTopic.subscribe('CLEAR_GRAPHICS', dojoLang.hitch(this, this.clearGraphics));
+          dojoTopic.subscribe('GR_CLEAR_GRAPHICS', dojoLang.hitch(this, this.clearGraphics));
+          dojoTopic.subscribe('GR_WIDGET_OPEN', dojoLang.hitch(this, this.setGraphicsShown));
+          dojoTopic.subscribe('GR_WIDGET_CLOSE', dojoLang.hitch(this, this.setGraphicsHidden));
 
           this.own(
             this.dt.on(
@@ -176,12 +178,28 @@ define([
             this._lineSym
           );
 
-          dojoDomAttr.set(this.startPointCoords, 'value', this.currentLine.formattedStartPoint);
-          dojoDomAttr.set(this.endPointCoords, 'value', this.currentLine.formattedEndPoint);
+          dojoDomAttr.set(
+            this.startPointCoords,
+            'value',
+            this.currentLine.formattedStartPoint
+          );
+
+          dojoDomAttr.set(
+            this.endPointCoords,
+            'value',
+            this.currentLine.formattedEndPoint
+          );
+          
           this.lengthUnitDDDidChange();
           this.angleUnitDDDidChange();
 
           this._gl.add(this.currentLine.graphic);
+          if (this._lengthLayer.graphics.length > 0) {
+            var tg = dojoLang.clone(this._lengthLayer.graphics[0].geometry);
+            var ts = dojoLang.clone(this._lengthLayer.graphics[0].symbol);
+            this._gl.add(new EsriGraphic(tg, ts));
+            this._lengthLayer.clear();
+          }
 
           this.emit('graphic_created', this.currentLine);
 
@@ -204,7 +222,24 @@ define([
             dojoDomAttr.set(this.lengthInput, 'value', '');
             dojoDomAttr.set(this.angleInput, 'value', '');
           }
-        }
+        },
 
+        /**
+         *
+         **/
+        setGraphicsHidden: function () {
+          if (this._gl) {
+            this._gl.hide();
+          }
+        },
+
+        /**
+         *
+         **/
+        setGraphicsShown: function () {
+          if (this._gl) {
+            this._gl.show();
+          }
+        }
     });
 });

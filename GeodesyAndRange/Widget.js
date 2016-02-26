@@ -94,10 +94,17 @@ define([
       }, this.tabContainer);
 
       this.own(dojoOn(this.clearGraphicsButton, 'click', function (){
-        dojoTopic.publish('CLEAR_GRAPHICS');
+        dojoTopic.publish('GR_CLEAR_GRAPHICS');
       }));
-    }
+    },
 
+    onClose: function () {
+      dojoTopic.publish('GR_WIDGET_CLOSE');
+    },
+
+    onOpen: function () {
+      dojoTopic.publish('GR_WIDGET_OPEN');
+    }
   });
   return clz;
 });

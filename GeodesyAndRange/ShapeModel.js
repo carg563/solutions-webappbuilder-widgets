@@ -20,13 +20,17 @@ define([
   'dojo/string',
   'dojo/number',
   'esri/geometry/geometryEngine',
-  'esri/geometry/webMercatorUtils'
+  'esri/geometry/webMercatorUtils',
+  'esri/geometry/Point',
+  'esri/geometry/Polyline'
 ], function (
   dojoDeclare,
   dojoString,
   dojoNumber,
   esriGeometryEngine,
-  esriWMUtils
+  esriWMUtils,
+  esriPoint,
+  esriPolyline
 ) {
   return dojoDeclare(null, {
 
@@ -83,16 +87,40 @@ define([
 
     /**
      *
+     * @param length
+     * @returns {*}
+     */
+    formatLength: function (length) {
+      return dojoNumber.format(length, {
+        places: 4
+      })
+    },
+
+    /**
+     *
      **/
     constructor: function (args) {
       dojoDeclare.safeMixin(this, args);
 
-      this.geodesicGeometry = esriGeometryEngine.geodesicDensify(this.geographicGeometry, 10000);
-
-      this.wmGeometry = esriWMUtils.geographicToWebMercator(this.geodesicGeometry);
-
+      if (this.geometry.type === "polygon") {
+        var pLine = new esriPolyline({
+          paths: [
+            [this.geometry.paths[0][0], this.geometry.paths[0][1]]
+          ],
+          spatialReference: {
+            wkid: this.geometry.spatialReference.wkid
+          }
+        });
+        pLine = esriWMUtils.webMercatorToGeographic(pLine);
+        this.geographicGeometry = pLine;
+        this.geodesicGeometry = esriGeometryEngine.geodesicDensify(pLine, 10000);
+        this.wmGeometry = this.geometry;
+      }
+      else {
+        this.geodesicGeometry = esriGeometryEngine.geodesicDensify(this.geographicGeometry, 10000);
+        this.wmGeometry = esriWMUtils.geographicToWebMercator(this.geodesicGeometry);
+      }
       this.startPoint = this.geodesicGeometry.getPoint(0,0);
-
       this.endPoint = this.geodesicGeometry.getPoint(0, this.geodesicGeometry.paths[0].length - 1);
 
       this.formattedStartPoint = dojoString.substitute('${xStr}, ${yStr}', {

@@ -65,6 +65,22 @@ define([
         this.lineTabNode
       );
 
+      this.circleTab = new TabCircle({
+        map: this.map,
+        circlesymbol: this.config.feedback.circlesymbol || {
+          type: 'esriSFS',
+          style: 'esriSLSSolid',
+          color: [255,0,0,0],
+          outline: {
+            color: [255, 50, 50, 255],
+            width: 1.25,
+            type: 'esriSLS',
+            style: 'esriSLSSolid'
+          }
+        }},
+        this.circleTabNode
+      );
+
       /**
        *
        **/
@@ -80,7 +96,7 @@ define([
           },
           {
             title: 'Circle',
-            content: new TabCircle({}, this.CircleTabContainer)
+            content: this.circleTab
           },
           {
             title: 'Ellipse',

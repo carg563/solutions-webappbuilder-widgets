@@ -26,11 +26,14 @@ define([
   'esri/geometry/Polyline',
   'esri/geometry/Polygon',
   'esri/geometry/Point',
+  'esri/geometry/Circle',
   'esri/geometry/screenUtils',
   'esri/graphic',
   'esri/geometry/geometryEngineAsync',
   'esri/symbols/TextSymbol',
-  'esri/symbols/Font'
+  'esri/symbols/Font',
+  'esri/geometry/webMercatorUtils',
+  'esri/units'
 ], function (
   dojoDeclare,
   dojoLang,
@@ -43,12 +46,15 @@ define([
   EsriPolyLine,
   EsriPolygon,
   EsriPoint,
+  EsriCircle,
   esriScreenUtils,
   EsriGraphic,
   esriGeoDUtils,
   EsriTextSymbol,
-  EsriFont
-) {
+  EsriFont,
+  EsriWebMercatorUtils,
+  EsriUnits
+  ) {
   return dojoDeclare([esriDraw, dojoStateful], {
 
     lengthLayer: null,
@@ -68,14 +74,14 @@ define([
       // force loading of the geometryEngine
       // prevents lag in feedback when used in mousedrag
       esriGeoDUtils.isSimple(new EsriPoint({
-        'x': -122.65,
-        'y': 45.53,
-        'spatialReference': {
-          'wkid': 4326
-        }
-      })).then(function (r) {
-        console.log('Geometry Engine initialized');
-      });
+          'x': -122.65,
+          'y': 45.53,
+          'spatialReference': {
+            'wkid': 4326
+          }
+        })).then(function (r) {
+          console.log('Geometry Engine initialized');
+        });
 
       this.inherited(arguments);
     },
@@ -103,7 +109,7 @@ define([
 
       var lblFont = new EsriFont(14, EsriFont.STYLE_NORMAL, EsriFont.VARIANT_NORMAL, EsriFont.WEIGHT_BOLD, 'Arial');
 
-      var txtLbl = new EsriTextSymbol(lenStr, lblFont, new EsriColor('white'));
+      var txtLbl = new EsriTextSymbol(lenStr, lblFont, new EsriColor('black'));
 
       this.lengthLayer.add(new EsriGraphic(lengthLoc, txtLbl));
     },
@@ -139,8 +145,8 @@ define([
         snappingPoint = this.map.snappingManager._snappingPoint;
       }
       var start = this._points[0],
-      end = snappingPoint || evt.mapPoint,
-      _graphic = this._graphic;
+        end = snappingPoint || evt.mapPoint,
+        _graphic = this._graphic;
       switch(this._geometryType){
         case esriDraw.LINE:
           var g = dojoLang.mixin(_graphic.geometry, {
@@ -155,11 +161,37 @@ define([
 
           // draw length of current line
           if (this.lengthLayer) {
-              esriGeoDUtils.geodesicLength(g, this.lengthUnit).then(dojoLang.hitch(this, function (l) {
-                this.showLength(end, l);
-              }));
+            esriGeoDUtils.geodesicLength(g, this.lengthUnit).then(dojoLang.hitch(this, function (l) {
+              this.showLength(end, l);
+            }));
           }
+          break;
+        case esriDraw.CIRCLE:
+          var pLine = new EsriPolyLine({
+            paths: [
+              [[start.x, start.y], [end.x, end.y]]
+            ],
+            spatialReference: {
+              wkid: _graphic.geometry.spatialReference.wkid
+            }
+          });
+          pLine = EsriWebMercatorUtils.webMercatorToGeographic(pLine);
 
+          esriGeoDUtils.geodesicLength(pLine, this.lengthUnit).then(dojoLang.hitch(this, function (l) {
+            var circleParams = {
+              center: EsriWebMercatorUtils.webMercatorToGeographic(start),
+              geodesic: true,
+              numberOfPoints: 60,
+              radius: this.convertToMeters(l),
+              radiusUnits: this.getRadiusUnitType()
+            };
+            var g = new EsriCircle(circleParams);
+            _graphic.geometry = dojoLang.mixin(g, {
+              paths:[
+                [[start.x, start.y], [end.x, end.y]]
+              ]});
+            _graphic.setGeometry(_graphic.geometry);
+          }));
           break;
       }
 
@@ -168,6 +200,56 @@ define([
         evt.preventDefault();
       }
       //this.inherited(arguments);
+    },
+
+    getRadiusUnitType: function () {
+      var selectedUnit = EsriUnits.METERS;
+      switch (this.lengthUnit) {
+        case "meters":
+          selectedUnit = EsriUnits.METERS;
+          break;
+        case "feet":
+          selectedUnit = EsriUnits.FEET;
+          break;
+        case "kilometers":
+          selectedUnit = EsriUnits.KILOMETERS;
+          break;
+        case "miles":
+          selectedUnit = EsriUnits.MILES;
+          break;
+        case "nautical-miles":
+          selectedUnit = EsriUnits.NAUTICAL_MILES;
+          break;
+        case "yards":
+          selectedUnit = EsriUnits.YARDS;
+          break;
+      }
+      return selectedUnit;
+    },
+
+    convertToMeters: function (length) {
+      var convertedLength = length;
+      switch (this.lengthUnit) {
+        case "meters":
+          convertedLength = length;
+          break;
+        case "feet":
+          convertedLength = length * 0.3048;
+          break;
+        case "kilometers":
+          convertedLength = length * 1000;
+          break;
+        case "miles":
+          convertedLength = length * 1609.34;
+          break;
+        case "nautical-miles":
+          convertedLength = length * 1852.001376036;
+          break;
+        case "yards":
+          convertedLength = length * 0.9144;
+          break;
+      }
+      return convertedLength;
     }
   });
 });

@@ -69,7 +69,7 @@ define([
         map: this.map,
         circlesymbol: this.config.feedback.circlesymbol || {
           type: 'esriSFS',
-          style: 'esriSLSSolid',
+          style: 'esriSFSNull',
           color: [255,0,0,0],
           outline: {
             color: [255, 50, 50, 255],

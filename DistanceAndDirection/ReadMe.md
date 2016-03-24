@@ -2,7 +2,7 @@
 
 This widget provides the ability to create geodesic features such as lines, circles, ellipses and range rings.
 
-![Image of Geodesy And Range Widget][ss]
+![Image of Distance and Directions Widget][ss]
 
 ## Features
 
@@ -42,7 +42,7 @@ In order to develop and test widgets you need to deploy the GeodesyAndRange fold
 ## Workflows
 
 ### Create Lines Interactively
-	* Choose the Lines tab on the Geodesy and Range Tool
+	* Choose the Lines tab on the Distance and Directions Tool
 	* Choose the type of line that is needed to be created
 	* Start an interactive session by selecting the arrow icon
 	* Enter a starting and ending point on the map by clicking on the map
@@ -63,14 +63,17 @@ In order to develop and test widgets you need to deploy the GeodesyAndRange fold
 	* Press "Enter" key and the graphic will be drawn on the map
 
 ### Create a Circle Interactively
-	* Choose the Circles tab on the Geodesy and Range Tool
-	* Start an interactive session by selecting the arrow icon
-	* Enter a starting point and the distance of the circles radius by clicking on the map
+	* Choose the Circle tab on the Distance and Direction Widget
+	* Choose the type of circle you will create from in the ‘Create Circle From’ drop down list.
+	* Start an interactive session by selecting the ‘Map Point’ icon 
+	* Click on the map to create a starting (center) point. Drag the tool to create a radius for the circle.  
 	* A graphic will then be displayed on the map showing the circle you created
+      Note: The ‘Center Point’ and ‘Radius/Diameter’ will update based on parameters from newly created circle.
 	* If desired you can clear all graphics with the clear graphics button
 
+
 ### Create Ellipses Interactively
-	* Choose the Ellipse tab on the Geodesy and Range Tool
+	* Choose the Ellipse tab on the Distance and Directions Tool
 	* Start an interactive session by selecting the arrow icon next to the “Center Point” text box
 	* Choose the location where you want the ellipse to be started from
 	* Drag the cursor to the location where the major axis will end
@@ -79,7 +82,7 @@ In order to develop and test widgets you need to deploy the GeodesyAndRange fold
 	* Graphic(s) will then be displayed on the map showing the Ellipse you created based on the values of the parameters that were set
 
 ### Create Range Rings Interactively
-	* Choose the Range Rings tab on the Geodesy and Range Tool
+	* Choose the Range Rings tab on the Distance and Directions Tool
 	* Start an interactive session by selecting the arrow icon next to the “Center Point” text box
 	* Choose the location of the Range Rings center by selecting the desired location on the map
 	* Fill in the associated parameters for “Number of Rings”, “Ring Interval”, “Distance Units”, and “Number of Radials”
@@ -87,7 +90,7 @@ In order to develop and test widgets you need to deploy the GeodesyAndRange fold
 	* Graphic(s) will then be displayed on the map showing the Range Rings you created based on the values of the parameters that were set
 
 ### Create Range Rings Manually
-	* Choose the Range Rings tab on the Geodesy and Range Tool
+	* Choose the Range Rings tab on the Distance and Directions Tool
 	* Fill in the associated parameters for “Number of Rings”, “Ring Interval”, “Distance Units”, and “Number of Radials”
 	* Input the coordinates for the Range Rings center in the “Center Point” text box and select the Enter key on the keyboard
 	* Graphic(s) will then be displayed on the map showing the Range Rings you created based on the values of the parameters that were set

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,6 +34,11 @@ define([
       /*jshint loopfunc: true */
       templateString: template,
       baseClass: 'imt-featurelayer-source',
+
+      postMixInProperties: function(){
+        this.inherited(arguments);
+        this.nls.common = window.jimuNls.common;
+      },
 
       postCreate: function() {
         this.inherited(arguments);
@@ -79,15 +84,17 @@ define([
           this.weatherLayersSelect.set("value", setWeatherLayers);
         }
 
+
+        this.btnOk.innerText = this.nls.common.ok;
         this.own(on(this.btnOk, 'click', lang.hitch(this, function() {
           var items = this._getSelectedLayers();
           this.emit('ok', items);
         })));
 
+        this.btnCancel.innerText = this.nls.common.cancel;
         this.own(on(this.btnCancel, 'click', lang.hitch(this, function() {
           this.emit('cancel');
         })));
-
       },
 
       _getSelectedLayers: function() {
@@ -102,6 +109,5 @@ define([
         }));
         return weatherLayers;
       }
-
     });
   });

@@ -1,3 +1,19 @@
+///////////////////////////////////////////////////////////////////////////
+// Copyright © 2016 Esri. All Rights Reserved.
+//
+// Licensed under the Apache License Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+///////////////////////////////////////////////////////////////////////////
+
 define([
   'dojo/_base/declare',
   'dojo/_base/lang',
@@ -17,15 +33,10 @@ define([
   var weatherInfo = declare('WeatherInfo', null, {
 
     constructor: function(tab, container, parent) {
-
       this.tab = tab;
-
       this.container = container;
-
       this.parent = parent;
-
       this.weatherURL = tab.url;
-
       this.weatherDict = {
         119: ["Cloudy", "cloudy5.png", "cloudy5.png"],
         377: ["Moderate or heavy showers of ice pellets", "hail.png", "hail.png"],
@@ -76,11 +87,32 @@ define([
         116: ["Partly Cloudy", "cloudy3.png", "cloudy3_night.png"],
         113: ["Clear/Sunny", "sunny.png", "sunny_night.png"]
       };
+    },
 
+    /* jshint unused: true */
+    queryTabCount: function (incidents, buffers, updateNode) {
+      this.updateTabCount(this.parent.incidents.length, updateNode, false);
+    },
+
+    /* jshint unused: true */
+    updateTabCount: function (count, updateNode) {
+      count = this.parent.incidents.length;
+      if (typeof (count) !== 'undefined' && count === 0) {
+        if (!domClass.contains(updateNode, 'noFeatures')) {
+          domClass.add(updateNode, 'noFeatures');
+        }
+      } else {
+        if (domClass.contains(updateNode, 'noFeatures')) {
+          domClass.remove(updateNode, 'noFeatures');
+        }
+      }
     },
 
     // update for Incident
-    updateForIncident: function(incident) {
+    updateForIncident: function (incidents) {
+
+      //TODO This should be based off of the combined extent
+      var incident = incidents[0];
       this.container.innerHTML = "";
       domClass.add(this.container, "loading");
       var geom = incident.geometry;
@@ -126,11 +158,9 @@ define([
       domClass.remove(this.container, "loading");
 
       var tpc = domConstruct.create("div", {
-        id: "tpc",
         style: "width:" + ((weather.length + 3) * 165) + "px;"
       }, this.container);
       domClass.add(tpc, "SAT_tabPanelContent");
-
 
       var cur, code, temp, w, info;
       if (current.length > 0) {
@@ -161,6 +191,7 @@ define([
           innerHTML: info
         }, tpc);
         domClass.add(div, "SATcolSmall");
+        domClass.add(div, this.parent.lightTheme ? 'lightThemeBorder' : 'darkThemeBorder');
 
         // wind
         var windSpeed = cur.windspeedMiles;
@@ -172,7 +203,7 @@ define([
           innerHTML: info
         }, tpc);
         domClass.add(div2, "SATcolSmall");
-
+        domClass.add(div2, this.parent.lightTheme ? 'lightThemeBorder' : 'darkThemeBorder');
       }
 
       // forecast
@@ -189,17 +220,19 @@ define([
           innerHTML: info
         }, tpc);
         domClass.add(div3, "SATcolSmall");
+        domClass.add(div3, this.parent.lightTheme ? 'lightThemeBorder' : 'darkThemeBorder');
       }
 
       // credits
-      var txt = '<br/><br/><br/><span style="font-size:11px;color:#6e6e6e">Powered by<br/>' +
+      var txt = '<br/><br/><br/><span style="font-size:11px;color:#6e6e6e">' + this.parent.nls.poweredBy + '<br/>' +
       '<a style="color:#6e6e6e;text-decoration:none" ' +
       'href="http://www.worldweatheronline.com/" title="Free Weather API" target="_blank">' +
-      'World Weather Online</a></span>';
+      'World Weather Online' + '</a></span>';
       var divCredit  = domConstruct.create("div", {
         innerHTML: txt
       }, tpc);
       domClass.add(divCredit, "SATcolSmall");
+      domClass.add(divCredit, this.parent.lightTheme ? 'lightThemeBorder' : 'darkThemeBorder');
       domClass.add(divCredit, "SATcolLast");
     },
 
@@ -221,6 +254,7 @@ define([
         innerHTML: info
       }, this.container);
       domClass.add(div, "SATcolSmall");
+      domClass.add(div, this.parent.lightTheme ? 'lightThemeBorder' : 'darkThemeBorder');
     }
   });
 
